@@ -27,6 +27,10 @@
 //! assert_eq!( num.prefix(), Prefix::Milli );
 //! assert_eq!( format!( "{}", num ), "9900 m" );
 //! ```
+//!
+//! # Optional Features
+//! * **tex** Enables returning `Prefix`es and `SiNum`s as strings usable directly by LaTeX (requires the `{siunitx}` LaTeX-package.
+
 
 
 
@@ -36,4 +40,4 @@
 
 
 mod sinum;
-pub use crate::sinum::{SiNum, Prefix};
+pub use crate::sinum::{Latex, SiNum, Prefix};

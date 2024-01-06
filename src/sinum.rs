@@ -31,6 +31,22 @@ pub enum PrefixError {
 
 
 //=============================================================================
+// Traits
+
+
+/// Providing conversion into LaTeX code.
+///
+/// This Trait is only available, if the **`tex`** feature has been enabled.
+#[cfg( feature = "tex" )]
+pub trait Latex {
+	/// Converts the entity into a LaTeX-string.
+	fn to_latex( &self ) -> String;
+}
+
+
+
+
+//=============================================================================
 // Enums
 
 
@@ -166,6 +182,39 @@ impl fmt::Display for Prefix {
 			Self::Giga =>    write!( f, "G" ),
 			Self::Tera =>    write!( f, "T" ),
 			Self::Peta =>    write!( f, "P" ),
+		}
+	}
+}
+
+#[cfg( feature = "tex" )]
+impl Latex for Prefix {
+	/// Return a string that represents this `Prefix` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
+	///
+	/// **Note** Requires the **`tex`** feature.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::Latex;
+	/// # use sinum::Prefix;
+	/// assert_eq!( Prefix::Femto.to_latex(), r"\femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex(), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex(), r"\giga".to_string() );
+	/// ```
+	fn to_latex( &self ) -> String {
+		match self {
+			Self::Femto =>   format!( r"\femto" ),
+			Self::Pico =>    format!( r"\pico" ),
+			Self::Nano =>    format!( r"\nano" ),
+			Self::Micro =>   format!( r"\micro" ),
+			Self::Milli =>   format!( r"\milli" ),
+			Self::Centi =>   format!( r"\centi" ),
+			Self::Deci =>    format!( r"\deca" ),
+			Self::Nothing => format!( "" ),
+			Self::Kilo =>    format!( r"\kilo" ),
+			Self::Mega =>    format!( r"\mega" ),
+			Self::Giga =>    format!( r"\giga" ),
+			Self::Tera =>    format!( r"\tera" ),
+			Self::Peta =>    format!( r"\peta" ),
 		}
 	}
 }
