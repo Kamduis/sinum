@@ -1,14 +1,10 @@
-pub fn add( left: usize, right: usize ) -> usize {
-	left + right
-}
+//! This crate provides the `SiNum` type that represents numbers that can easily be represented by the International System of Units (SI, from French Système International).
 
-#[cfg(test)]
-mod tests {
-	use super::*;
 
-	#[test]
-	fn it_works() {
-		let result = add( 2, 2 );
-		assert_eq!( result, 4 );
-	}
-}
+
+
+//=============================================================================
+// Modules
+
+
+mod sinum;
