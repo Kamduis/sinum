@@ -25,7 +25,8 @@ assert_eq!( format!( "{}", num ), "9.9 m" );
 ```
 
 A `SiNum` prefix can be changed, without changing the value of the number it represents:
-```
+
+```rust,no_run
 use sinum::{SiNum,Prefix};
 
 let num = SiNum::new( 9.9 ).to_prefix( Prefix::Milli );

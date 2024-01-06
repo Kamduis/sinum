@@ -40,4 +40,6 @@
 
 
 mod sinum;
-pub use crate::sinum::{Latex, SiNum, Prefix};
+pub use crate::sinum::Latex;
+pub use crate::sinum::PrefixError;
+pub use crate::sinum::{SiNum, Prefix};
