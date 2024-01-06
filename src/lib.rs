@@ -8,3 +8,4 @@
 
 
 mod sinum;
+pub use crate::sinum::{SiNum, Prefix};

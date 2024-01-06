@@ -159,7 +159,7 @@ pub struct SiNum {
 }
 
 impl SiNum {
-	/// Create a new `SiNum` with abosulte value `num`.
+	/// Create a new `SiNum` representing the numeric value `num` without any prefix.
 	pub fn new( num: f64 ) -> Self {
 		Self {
 			mantissa: num,
