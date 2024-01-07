@@ -40,6 +40,9 @@
 
 
 mod sinum;
+
+#[cfg( feature = "tex" )]
 pub use crate::sinum::Latex;
+
 pub use crate::sinum::PrefixError;
 pub use crate::sinum::{SiNum, Prefix};
