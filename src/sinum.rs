@@ -527,6 +527,31 @@ impl Add for SiNum {
 	}
 }
 
+impl Add<f64> for SiNum {
+	type Output = Self;
+
+	/// The addition operator `+`. The resulting `SiNum` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let calc_a = SiNum::new( 1.0 ) + 0.1;
+	///
+	/// assert_eq!( calc_a, SiNum::new( 1.1 ) );
+	/// assert_eq!( calc_a.prefix(), Prefix::Nothing );
+	///
+	/// let calc_b = SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) + 4.0;
+	///
+	/// assert_eq!( calc_b, SiNum::new( 2.004 ).with_prefix( Prefix::Kilo ) );
+	/// assert_eq!( calc_b.prefix(), Prefix::Kilo );
+	/// ```
+	fn add( self, other: f64 ) -> Self::Output {
+		let val = self.as_f64() + other;
+
+		Self::new( val ).to_prefix( self.prefix() )
+	}
+}
+
 impl Sub for SiNum {
 	type Output = Self;
 
@@ -550,6 +575,31 @@ impl Sub for SiNum {
 		let pref = self.prefix().max( other.prefix() );
 
 		Self::new( val ).to_prefix( pref )
+	}
+}
+
+impl Sub<f64> for SiNum {
+	type Output = Self;
+
+	/// The subtraction operator `-`. The resulting `SiNum` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let calc_a = SiNum::new( 1.0 ) - 0.1;
+	///
+	/// assert_eq!( calc_a, SiNum::new( 0.9 ) );
+	/// assert_eq!( calc_a.prefix(), Prefix::Nothing );
+	///
+	/// let calc_b = SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) - 4.0;
+	///
+	/// assert_eq!( calc_b, SiNum::new( 1.996 ).with_prefix( Prefix::Kilo ) );
+	/// assert_eq!( calc_b.prefix(), Prefix::Kilo );
+	/// ```
+	fn sub( self, other: f64 ) -> Self::Output {
+		let val = self.as_f64() - other;
+
+		Self::new( val ).to_prefix( self.prefix() )
 	}
 }
 
@@ -579,6 +629,31 @@ impl Mul for SiNum {
 	}
 }
 
+impl Mul<f64> for SiNum {
+	type Output = Self;
+
+	/// The multiplication operator `*`. The resulting `SiNum` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let calc_a = SiNum::new( 1.0 ) * 0.1;
+	///
+	/// assert_eq!( calc_a, SiNum::new( 0.1 ) );
+	/// assert_eq!( calc_a.prefix(), Prefix::Nothing );
+	///
+	/// let calc_b = SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) * 4.0;
+	///
+	/// assert_eq!( calc_b, SiNum::new( 8.0 ).with_prefix( Prefix::Kilo ) );
+	/// assert_eq!( calc_b.prefix(), Prefix::Kilo );
+	/// ```
+	fn mul( self, other: f64 ) -> Self::Output {
+		let val = self.as_f64() * other;
+
+		Self::new( val ).to_prefix( self.prefix() )
+	}
+}
+
 impl Div for SiNum {
 	type Output = Self;
 
@@ -602,6 +677,31 @@ impl Div for SiNum {
 		let pref = self.prefix().max( other.prefix() );
 
 		Self::new( val ).to_prefix( pref )
+	}
+}
+
+impl Div<f64> for SiNum {
+	type Output = Self;
+
+	/// The multiplication operator `/`. The resulting `SiNum` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let calc_a = SiNum::new( 1.0 ) / 0.1;
+	///
+	/// assert_eq!( calc_a, SiNum::new( 10.0 ) );
+	/// assert_eq!( calc_a.prefix(), Prefix::Nothing );
+	///
+	/// let calc_b = SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) / 4.0;
+	///
+	/// assert_eq!( calc_b, SiNum::new( 0.5 ).with_prefix( Prefix::Kilo ) );
+	/// assert_eq!( calc_b.prefix(), Prefix::Kilo );
+	/// ```
+	fn div( self, other: f64 ) -> Self::Output {
+		let val = self.as_f64() / other;
+
+		Self::new( val ).to_prefix( self.prefix() )
 	}
 }
 
