@@ -7,7 +7,8 @@
 // Crates
 
 
-use std::ops::{Add, Sub, Mul, Div};
+use std::cmp::Ordering;
+use std::ops::{Add, Sub, Mul, Div, Neg};
 use std::fmt;
 
 use thiserror::Error;
@@ -228,7 +229,7 @@ impl Latex for Prefix {
 
 
 /// Represents a number in combination with a SI prefix.
-#[derive( Clone, Copy, PartialOrd, Debug )]
+#[derive( Clone, Copy, Debug )]
 pub struct SiNum {
 	mantissa: f64,
 	prefix: Prefix
@@ -366,6 +367,101 @@ impl SiNum {
 	pub fn as_f64( &self ) -> f64 {
 		self.mantissa * self.prefix.as_f64()
 	}
+
+	/// Computes the absolute value of `self`.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let x = SiNum::new( 3.5 );
+	/// let y = SiNum::new( -3.5 );
+	///
+	/// let abs_difference_x = ( x.abs() - x ).abs();
+	/// let abs_difference_y = ( y.abs() - ( -y ) ).abs();
+	///
+	/// assert!( abs_difference_x < 1e-10 );
+	/// assert!( abs_difference_y < 1e-10 );
+	/// ```
+	pub fn abs( self ) -> Self {
+		let val = self.as_f64().abs();
+		Self::new( val ).to_prefix( self.prefix() )
+	}
+
+	/// Raises the number to an integer power.
+	///
+	/// Using this function is generally faster than using `powf`. It might have a different sequence of rounding operations than `powf`, so the results are not guaranteed to agree.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let x = SiNum::new( 2.0 );
+	/// let abs_diff = ( x.powi( 2 ) - ( x * x ) ).abs();
+	///
+	/// assert!( abs_diff < 1e-10 );
+	/// ```
+	pub fn powi( self, n: i32 ) -> Self {
+		let val = self.as_f64().powi( n );
+		Self::new( val ).to_prefix( self.prefix() )
+	}
+
+	/// Raises the number to a floating point power.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// let x = SiNum::new( 2.0 );
+	/// let abs_diff = ( x.powf( 2.0 ) - ( x * x ) ).abs();
+	///
+	/// assert!( abs_diff < 1e-10 );
+	/// ```
+	pub fn powf( self, n: f64 ) -> Self {
+		let val = self.as_f64().powf( n );
+		Self::new( val ).to_prefix( self.prefix() )
+	}
+}
+
+impl PartialOrd for SiNum {
+	fn partial_cmp( &self, other: &Self ) -> Option<Ordering> {
+		self.as_f64().partial_cmp( &other.as_f64() )
+	}
+
+	fn lt( &self, other: &Self ) -> bool {
+		self.as_f64() < other.as_f64()
+	}
+
+	fn le( &self, other: &Self ) -> bool {
+		self.as_f64() <= other.as_f64()
+	}
+
+	fn ge( &self, other: &Self ) -> bool {
+		self.as_f64() >= other.as_f64()
+	}
+
+	fn gt( &self, other: &Self ) -> bool {
+		self.as_f64() > other.as_f64()
+	}
+}
+
+impl PartialOrd<f64> for SiNum {
+	fn partial_cmp( &self, other: &f64 ) -> Option<Ordering> {
+		self.as_f64().partial_cmp( &other )
+	}
+
+	fn lt( &self, other: &f64 ) -> bool {
+		self.as_f64() < *other
+	}
+
+	fn le( &self, other: &f64 ) -> bool {
+		self.as_f64() <= *other
+	}
+
+	fn ge( &self, other: &f64 ) -> bool {
+		self.as_f64() >= *other
+	}
+
+	fn gt( &self, other: &f64 ) -> bool {
+		self.as_f64() > *other
+	}
 }
 
 impl PartialEq for SiNum {
@@ -379,6 +475,20 @@ impl PartialEq for SiNum {
 	/// ```
 	fn eq( &self, other: &Self ) -> bool {
 		self.as_f64().eq( &other.as_f64() )
+	}
+}
+
+impl PartialEq<f64> for SiNum {
+	/// Compares a `SiNum` and a `f64` for equality.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// assert!( SiNum::new( 1.1 ) == 1.1 );
+	/// assert!( SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) == 2e3 );
+	/// ```
+	fn eq( &self, other: &f64 ) -> bool {
+		self.as_f64().eq( &other )
 	}
 }
 
@@ -492,6 +602,16 @@ impl Div for SiNum {
 		let pref = self.prefix().max( other.prefix() );
 
 		Self::new( val ).to_prefix( pref )
+	}
+}
+
+impl Neg for SiNum {
+	type Output = Self;
+
+	fn neg( self ) -> Self::Output {
+		let val = -self.as_f64();
+
+		Self::new( val ).to_prefix( self.prefix() )
 	}
 }
 
