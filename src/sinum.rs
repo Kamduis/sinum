@@ -315,8 +315,16 @@ impl SiNum {
 	/// 	SiNum::new( 1234.5 ).shorten().unwrap(),
 	/// 	SiNum::new( 1.2345 ).with_prefix( Prefix::Kilo )
 	/// );
+	/// assert_eq!(
+	/// 	SiNum::new( 0.0 ).with_prefix( Prefix::Mega ).shorten().unwrap(),
+	/// 	SiNum::new( 0.0 )
+	/// );
 	/// ```
 	pub fn shorten( self ) -> Result<Self, PrefixError> {
+		if self.mantissa == 0.0 {
+			return Ok( Self::new( 0.0 ) );
+		}
+
 		let exps = self.mantissa.log10().floor().div_euclid( 3.0 ) * 3.0;
 
 		if exps > Prefix::MAX_EXP as f64 {
