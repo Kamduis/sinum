@@ -7,6 +7,7 @@
 // Crates
 
 
+use std::collections::HashMap;
 use std::fmt;
 
 use thiserror::Error;
@@ -22,6 +23,8 @@ use crate::Latex;
 
 #[derive( Error, Debug )]
 pub enum UnitError {
+	#[error( "Not all units represent the same physical quantity: {}", .0.iter().map( |x| x.to_string() ).collect::<Vec<String>>().join( ", " ) )]
+	UnitMismatch( Vec<Unit> )
 }
 
 
@@ -31,8 +34,57 @@ pub enum UnitError {
 // Enums
 
 
+pub(super) enum Dimension {
+	Current,
+	LuminousIntensity,
+	Temperature,
+	Mass,
+	Length,
+	Amount,
+	Time,
+}
+
+impl Dimension {
+	/// Returns the available units for this `Dimension` and the factor to the base unit.
+	pub fn units( &self ) -> HashMap<Unit, f64> {
+		match self {
+			Self::Current => HashMap::from( [
+				( Unit::Ampere, 1.0 ),
+			] ),
+			Self::LuminousIntensity => HashMap::from( [
+				( Unit::Candela, 1.0 ),
+			] ),
+			Self::Temperature => HashMap::from( [
+				( Unit::Kelvin, 1.0 ),
+			] ),
+			Self::Mass => HashMap::from( [
+				( Unit::Gram, 1e-3 ),
+				( Unit::Kilogram, 1.0 ),
+				( Unit::Tonne, 1e3 ),
+			] ),
+			Self::Length => HashMap::from( [
+				( Unit::Meter, 1.0 ),
+			] ),
+			Self::Amount => HashMap::from( [
+				( Unit::Mole, 1.0 ),
+			] ),
+			Self::Time => HashMap::from( [
+				( Unit::Second, 1.0 ),
+			] ),
+		}
+	}
+}
+
+impl From<Unit> for Dimension {
+	/// Returns the `Dimension` that is measured by `item`.
+	fn from( item: Unit ) -> Self {
+		item.dimension()
+	}
+}
+
+
 /// Represents the different SI units.
-#[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Debug )]
+#[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
 pub enum Unit {
 	// Base units
 	Ampere,
@@ -42,11 +94,31 @@ pub enum Unit {
 	Meter,
 	Mole,
 	Second,
+	// Additional mass units
+	Gram,
+	Tonne,
+}
+
+impl Unit {
+	/// Returns the `Dimension` that is measured by `self`.
+	pub(super) fn dimension( &self ) -> Dimension {
+		match self {
+			// Base units
+			Self::Ampere =>    Dimension::Current,
+			Self::Candela =>   Dimension::LuminousIntensity,
+			Self::Kelvin =>    Dimension::Temperature,
+			Self::Kilogram | Self::Gram | Self::Tonne =>  Dimension::Mass,
+			Self::Meter =>     Dimension::Length,
+			Self::Mole =>      Dimension::Amount,
+			Self::Second =>    Dimension::Time,
+		}
+	}
 }
 
 impl fmt::Display for Unit {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		match self {
+			// Base units
 			Self::Ampere =>    write!( f, "A" ),
 			Self::Candela =>   write!( f, "cd" ),
 			Self::Kelvin =>    write!( f, "K" ),
@@ -54,6 +126,9 @@ impl fmt::Display for Unit {
 			Self::Meter =>     write!( f, "m" ),
 			Self::Mole =>      write!( f, "mol" ),
 			Self::Second =>    write!( f, "s" ),
+			// Additional mass units
+			Self::Gram =>      write!( f, "g" ),
+			Self::Tonne =>     write!( f, "t" ),
 		}
 	}
 }
@@ -73,6 +148,7 @@ impl Latex for Unit {
 	/// ```
 	fn to_latex( &self ) -> String {
 		match self {
+			// Base units
 			Self::Ampere =>    format!( r"\ampere" ),
 			Self::Candela =>   format!( r"\candela" ),
 			Self::Kelvin =>    format!( r"\kelvin" ),
@@ -80,6 +156,9 @@ impl Latex for Unit {
 			Self::Meter =>     format!( r"\meter" ),
 			Self::Mole =>      format!( r"\mol" ),
 			Self::Second =>    format!( r"\second" ),
+			// Additional mass units
+			Self::Gram =>      format!( r"\gram" ),
+			Self::Tonne =>     format!( r"\tonne" ),
 		}
 	}
 }

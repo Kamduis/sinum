@@ -47,6 +47,7 @@ mod number;
 pub use crate::number::SiNum;
 
 mod unit;
+use crate::unit::Dimension;
 pub use crate::unit::Unit;
 
 mod quantity;
