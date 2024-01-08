@@ -34,6 +34,7 @@ pub enum UnitError {
 // Enums
 
 
+#[derive( PartialEq, Eq, Debug )]
 pub(super) enum PhysicalQuantity {
 	Current,
 	LuminousIntensity,

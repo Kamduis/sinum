@@ -210,6 +210,10 @@ impl PartialEq for Qty {
 	/// assert!( val_b == val_c );
 	/// ```
 	fn eq( &self, other: &Qty ) -> bool {
+		if self.phys() != other.phys() {
+			return false;
+		}
+
 		self.as_f64().eq( &other.as_f64() )
 	}
 }
