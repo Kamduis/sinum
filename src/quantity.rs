@@ -10,6 +10,7 @@
 use std::fmt;
 
 use crate::Latex;
+use crate::prefix::PrefixError;
 use crate::unit::UnitError;
 use crate::{SiNum, Prefix, Unit, Dimension};
 
@@ -54,6 +55,32 @@ impl SiQty {
 			number: num,
 			unit: uni,
 		}
+	}
+
+	/// Creates a new `SiQty` from `self` with a reduced numbers of digits of the mantissa (see `mantissa()`) required to represent the number:
+	///
+	/// * No more than 3 digits in front of the decimal point.
+	/// 	(1234 → 1.234 k)
+	///
+	/// * No zero in front of the decimal point.
+	/// 	(0.001 → 1.0 m)
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiQty, SiNum, Unit, Prefix};
+	/// assert_eq!(
+	/// 	SiQty::new( 1000.0.into(), Unit::Ampere ).shorten().unwrap(),
+	/// 	SiQty::new( SiNum::new( 1.0.into() ).with_prefix( Prefix::Kilo ), Unit::Ampere )
+	/// );
+	/// assert_eq!(
+	/// 	SiQty::new( 0.001.into(), Unit::Candela ).shorten().unwrap(),
+	/// 	SiQty::new( SiNum::new( 1.0 ).with_prefix( Prefix::Milli ), Unit::Candela )
+	/// );
+	/// ```
+	pub fn shorten( self ) -> Result<Self, PrefixError> {
+		let num = self.number.shorten()?;
+
+		Ok( Self::new( num, self.unit() ) )
 	}
 
 	/// Returns the numeric value of the `SiQty` without any prefix or unit.
