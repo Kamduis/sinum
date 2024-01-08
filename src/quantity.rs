@@ -14,7 +14,7 @@ use std::ops::{Add, Sub, Mul, Div, Neg};
 use crate::Latex;
 use crate::prefix::PrefixError;
 use crate::unit::UnitError;
-use crate::{Num, Prefix, Unit, Dimension};
+use crate::{Num, Prefix, Unit, PhysicalQuantity};
 
 
 
@@ -121,9 +121,9 @@ impl Qty {
 		self.unit
 	}
 
-	/// Returns the dimension that is represented by the `Qty`.
-	fn dimension( &self ) -> Dimension {
-		self.unit.dimension()
+	/// Returns the physical quantity that is represented by the `Qty`.
+	fn phys( &self ) -> PhysicalQuantity {
+		self.unit.phys()
 	}
 
 	/// Creates a new `Qty` from `self` at the specified `prefix`.
@@ -149,7 +149,7 @@ impl Qty {
 
 	/// Returns a new `Qty` from `self` with the new `unit`.
 	///
-	/// If `unit` does not represent the same dimension as the original unit, this function returns an `UnitError`.
+	/// If `unit` does not represent the same physical quantity as the original unit, this function returns an `UnitError`.
 	///
 	/// # Example
 	/// ```
@@ -158,13 +158,13 @@ impl Qty {
 	/// assert!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Second ).is_err() );
 	/// ```
 	pub fn to_unit( &self, unit: Unit ) -> Result<Self, UnitError> {
-		let units = self.dimension().units();
+		let units = self.phys().units();
 		let Some( factor_new ) = units.get( &unit ) else {
 			return Err( UnitError::UnitMismatch( vec![ self.unit(), unit ] ) );
 		};
 
 		let factor_old = units.get( &self.unit() ).clone()
-			.expect( "This unit is not assigned to a dimension, which it really should be" );
+			.expect( "This unit is not assigned to a physical quantity, which it really should be!" );
 
 		let factor = factor_old / factor_new;
 

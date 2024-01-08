@@ -34,7 +34,7 @@ pub enum UnitError {
 // Enums
 
 
-pub(super) enum Dimension {
+pub(super) enum PhysicalQuantity {
 	Current,
 	LuminousIntensity,
 	Temperature,
@@ -44,8 +44,8 @@ pub(super) enum Dimension {
 	Time,
 }
 
-impl Dimension {
-	/// Returns the available units for this `Dimension` and the factor to the base unit.
+impl PhysicalQuantity {
+	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
 	pub fn units( &self ) -> HashMap<Unit, f64> {
 		match self {
 			Self::Current => HashMap::from( [
@@ -75,10 +75,10 @@ impl Dimension {
 	}
 }
 
-impl From<Unit> for Dimension {
-	/// Returns the `Dimension` that is measured by `item`.
+impl From<Unit> for PhysicalQuantity {
+	/// Returns the `PhysicalQuantity` that is measured by `item`.
 	fn from( item: Unit ) -> Self {
-		item.dimension()
+		item.phys()
 	}
 }
 
@@ -100,17 +100,17 @@ pub enum Unit {
 }
 
 impl Unit {
-	/// Returns the `Dimension` that is measured by `self`.
-	pub(super) fn dimension( &self ) -> Dimension {
+	/// Returns the `PhysicalQuantity` that is measured by `self`.
+	pub(super) fn phys( &self ) -> PhysicalQuantity {
 		match self {
 			// Base units
-			Self::Ampere =>    Dimension::Current,
-			Self::Candela =>   Dimension::LuminousIntensity,
-			Self::Kelvin =>    Dimension::Temperature,
-			Self::Kilogram | Self::Gram | Self::Tonne =>  Dimension::Mass,
-			Self::Meter =>     Dimension::Length,
-			Self::Mole =>      Dimension::Amount,
-			Self::Second =>    Dimension::Time,
+			Self::Ampere =>    PhysicalQuantity::Current,
+			Self::Candela =>   PhysicalQuantity::LuminousIntensity,
+			Self::Kelvin =>    PhysicalQuantity::Temperature,
+			Self::Kilogram | Self::Gram | Self::Tonne =>  PhysicalQuantity::Mass,
+			Self::Meter =>     PhysicalQuantity::Length,
+			Self::Mole =>      PhysicalQuantity::Amount,
+			Self::Second =>    PhysicalQuantity::Time,
 		}
 	}
 
