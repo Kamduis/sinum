@@ -53,18 +53,11 @@ pub use crate::unit::Unit;
 mod quantity;
 pub use crate::quantity::Qty;
 
-
-
-
-//=============================================================================
-// Traits
-
-
-/// Providing conversion into LaTeX code.
-///
-/// This Trait is only available, if the **`tex`** feature has been enabled.
 #[cfg( feature = "tex" )]
-pub trait Latex {
-	/// Converts the entity into a LaTeX-string.
-	fn to_latex( &self ) -> String;
-}
+mod latex;
+
+#[cfg( feature = "tex" )]
+pub use crate::latex::Latex;
+
+#[cfg( feature = "tex" )]
+pub use crate::latex::Options;

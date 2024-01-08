@@ -12,7 +12,10 @@ use std::fmt;
 
 use thiserror::Error;
 
+#[cfg( feature = "tex" )]
 use crate::Latex;
+#[cfg( feature = "tex" )]
+use crate::Options;
 
 
 
@@ -175,11 +178,11 @@ impl Latex for Unit {
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::Unit;
-	/// assert_eq!( Unit::Meter.to_latex(), r"\meter".to_string() );
-	/// assert_eq!( Unit::Second.to_latex(), r"\second".to_string() );
+	/// # use sinum::{Unit, Options};
+	/// assert_eq!( Unit::Meter.to_latex( &Options::none() ), r"\meter".to_string() );
+	/// assert_eq!( Unit::Second.to_latex( &Options::new() ), r"\second".to_string() );
 	/// ```
-	fn to_latex( &self ) -> String {
+	fn to_latex( &self, _options: &Options ) -> String {
 		match self {
 			// Base units
 			Self::Ampere =>    format!( r"\ampere" ),

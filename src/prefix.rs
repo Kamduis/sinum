@@ -11,7 +11,10 @@ use std::fmt;
 
 use thiserror::Error;
 
+#[cfg( feature = "tex" )]
 use crate::Latex;
+#[cfg( feature = "tex" )]
+use crate::Options;
 
 
 
@@ -221,12 +224,12 @@ impl Latex for Prefix {
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::Prefix;
-	/// assert_eq!( Prefix::Femto.to_latex(), r"\femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex(), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex(), r"\giga".to_string() );
+	/// # use sinum::{Prefix, Options};
+	/// assert_eq!( Prefix::Femto.to_latex( &Options::none() ), r"\femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex( &Options::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex( &Options::none() ), r"\giga".to_string() );
 	/// ```
-	fn to_latex( &self ) -> String {
+	fn to_latex( &self, _options: &Options ) -> String {
 		match self {
 			Self::Yocto =>   format!( r"\yocto" ),
 			Self::Zepto =>   format!( r"\zepto" ),
