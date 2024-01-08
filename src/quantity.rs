@@ -9,6 +9,7 @@
 
 use std::fmt;
 
+use crate::Latex;
 use crate::unit::UnitError;
 use crate::{SiNum, Prefix, Unit, Dimension};
 
@@ -42,6 +43,9 @@ impl SiQty {
 				let exp_new = number.prefix().exp() + 3;
 				let prefix_new = Prefix::try_from( exp_new ).unwrap();
 				( number.with_prefix( prefix_new ), Unit::Gram )
+			},
+			Unit::Gram if number.prefix() == Prefix::Kilo => {
+				( number.with_prefix( Prefix::Nothing ), Unit::Kilogram )
 			},
 			_ => ( number, unit ),
 		};
@@ -127,6 +131,61 @@ impl fmt::Display for SiQty {
 	}
 }
 
+#[cfg( feature = "tex" )]
+impl Latex for SiQty {
+	/// Return a string that represents this `SiQty` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
+	///
+	/// **Note** Requires the **`tex`** feature.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::Latex;
+	/// # use sinum::{SiQty, Unit, SiNum, Prefix};
+	/// assert_eq!( SiQty::new( 9.9.into(), Unit::Ampere ).to_latex(), r"\qty{9.9}{\ampere}".to_string() );
+	/// assert_eq!(
+	/// 	SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Ampere ).to_latex(),
+	/// 	r"\qty{9.9}{\milli\ampere}".to_string()
+	/// );
+	/// ```
+	///
+	/// # Kilogram
+	///
+	/// The base unit for mass, the kilogram is a special case, since it already has a prefix (kilo), that has to be taken into account.
+	/// ```
+	/// # use sinum::Latex;
+	/// # use sinum::{SiQty, Unit, SiNum, Prefix};
+	/// assert_eq!( SiQty::new( 9.9.into(), Unit::Kilogram ).to_latex(), r"\qty{9.9}{\kilogram}".to_string() );
+	/// assert_eq!(
+	/// 	SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_latex(),
+	/// 	r"\qty{9.9}{\mega\gram}".to_string()
+	/// );
+	/// assert_eq!(
+	/// 	SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_latex(),
+	/// 	r"\qty{9.9}{\gram}".to_string()
+	/// );
+	/// assert_eq!(
+	/// 	SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_latex(),
+	/// 	r"\qty{9.9}{\milli\gram}".to_string()
+	/// );
+	/// assert_eq!( SiQty::new(
+	/// 	SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_latex(),
+	/// 	r"\qty{9.9}{\milli\gram}".to_string()
+	/// );
+	/// assert_eq!(
+	/// 	SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_latex(),
+	/// 	r"\qty{9.9}{\kilogram}".to_string()
+	/// );
+	/// ```
+	fn to_latex( &self ) -> String {
+		format!(
+			r"\qty{{{}}}{{{}{}}}",
+			self.number.mantissa(),
+			self.number.prefix().to_latex(),
+			self.unit.to_latex()
+		)
+	}
+}
+
 
 
 
@@ -157,5 +216,17 @@ mod tests {
 		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_string(), "9.9 g".to_string() );
 		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_string(), "9.9 mg".to_string() );
 		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_string(), "9.9 mg".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_string(), "9.9 kg".to_string() );
+	}
+
+	#[cfg( feature = "tex" )]
+	#[test]
+	fn siqty_latex_kilogram() {
+		assert_eq!( SiQty::new( 9.9.into(), Unit::Kilogram ).to_latex(), r"\qty{9.9}{\kilogram}".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_latex(), r"\qty{9.9}{\mega\gram}".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_latex(), r"\qty{9.9}{\gram}".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_latex(), r"\qty{9.9}{\milli\gram}".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_latex(), r"\qty{9.9}{\milli\gram}".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_latex(), r"\qty{9.9}{\kilogram}".to_string() );
 	}
 }
