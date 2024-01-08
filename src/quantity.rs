@@ -36,9 +36,19 @@ impl SiQty {
 	/// assert_eq!( SiQty::new( 99.9.into(), Unit::Kelvin ).as_f64(), 99.9 );
 	/// ```
 	pub fn new( number: SiNum, unit: Unit ) -> Self {
+		let ( num, uni ) = match unit {
+			// The Kilogram as base unit must only be used if the number prefix is `Prefix::Nothing`. If the Prefix is anything else, the unit `Unit::Gram` must be used to correctly display the prefixes like "mg" or "ng".
+			Unit::Kilogram if number.prefix() != Prefix::Nothing => {
+				let exp_new = number.prefix().exp() + 3;
+				let prefix_new = Prefix::try_from( exp_new ).unwrap();
+				( number.with_prefix( prefix_new ), Unit::Gram )
+			},
+			_ => ( number, unit ),
+		};
+
 		Self {
-			number,
-			unit,
+			number: num,
+			unit: uni,
 		}
 	}
 
@@ -98,7 +108,7 @@ impl SiQty {
 		};
 
 		let factor_old = units.get( &self.unit() ).clone()
-			.expect( "This unit is not assigned to a dimension, which it really should be!" );
+			.expect( "This unit is not assigned to a dimension, which it really should be" );
 
 		let factor = factor_old / factor_new;
 
@@ -135,5 +145,17 @@ mod tests {
 		assert_eq!( SiQty::new( 9.9.into(), Unit::Ampere ).to_string(), "9.9 A".to_string() );
 		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Meter ).to_string(), "9.9 km".to_string() );
 		assert_eq!( SiQty::new( 9.9.into(), Unit::Kelvin ).to_string(), "9.9 K".to_string() );
+	}
+
+	// The weight/mass is a special case.
+	#[test]
+	fn siqty_kilogram() {
+		assert_eq!( SiQty::new( 9.9.into(), Unit::Kilogram ).as_f64(), 9.9 );
+		assert_eq!( SiQty::new( 9.9.into(), Unit::Kilogram ).number(), SiNum::new( 9.9 ) );
+		assert_eq!( SiQty::new( 9.9.into(), Unit::Kilogram ).to_string(), "9.9 kg".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_string(), "9.9 Mg".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_string(), "9.9 g".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_string(), "9.9 mg".to_string() );
+		assert_eq!( SiQty::new( SiNum::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_string(), "9.9 mg".to_string() );
 	}
 }
