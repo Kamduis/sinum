@@ -43,8 +43,14 @@ mod prefix;
 pub use crate::prefix::PrefixError;
 pub use crate::prefix::Prefix;
 
-mod sinum;
-pub use crate::sinum::SiNum;
+mod number;
+pub use crate::number::SiNum;
+
+mod unit;
+pub use crate::unit::Unit;
+
+mod quantity;
+pub use crate::quantity::SiQty;
 
 
 

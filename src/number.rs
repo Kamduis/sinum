@@ -1,4 +1,4 @@
-//! Provides values using the SI prefix and unit system.
+//! Provides values using the SI prefix system.
 
 
 
@@ -12,7 +12,7 @@ use std::ops::{Add, Sub, Mul, Div, Neg};
 use std::fmt;
 
 use crate::PrefixError;
-use crate::Prefix;
+use crate::{Prefix, SiQty, Unit};
 
 
 
@@ -59,6 +59,17 @@ impl SiNum {
 			mantissa: self.mantissa,
 			prefix,
 		}
+	}
+
+	/// Creates a new `SiQty` from `self` by applying `unit`.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, SiQty, Unit};
+	/// assert_eq!( SiNum::new( 9.9 ).with_unit( Unit::Second ), SiQty::new( 9.9.into(), Unit::Second ) );
+	/// ```
+	pub fn with_unit( self, unit: Unit ) -> SiQty {
+		SiQty::new( self, unit )
 	}
 
 	/// Creates a new `SiNum` from `self` at the specified `prefix`.
