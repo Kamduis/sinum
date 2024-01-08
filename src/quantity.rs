@@ -24,7 +24,7 @@ use crate::{Num, Prefix, Unit, Dimension};
 
 
 /// Represents a number in combination with a SI prefix.
-#[derive( Clone, Copy, PartialEq, Debug )]
+#[derive( Clone, Copy, Debug )]
 pub struct Qty {
 	number: Num,
 	unit: Unit,
@@ -190,6 +190,27 @@ impl Qty {
 	pub fn abs( self ) -> Self {
 		let val = self.as_f64().abs();
 		Self::new( Num::new( val ).to_prefix( self.number.prefix() ), self.unit() )
+	}
+}
+
+impl PartialEq for Qty {
+	/// Compares two `Qty`s for equality. It compares that the numeric value is identical, not the representation.
+	/// 1 Mg == 1000 kg == 1 t
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Qty, Num, Prefix, Unit};
+	/// assert!( Qty::new( 1.1.into(), Unit::Ampere ) == Qty::new( 1.1.into(), Unit::Ampere ) );
+	///
+	/// let val_a = Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Mega ), Unit::Gram );
+	/// let val_b = Qty::new( Num::new( 1000.0 ), Unit::Kilogram );
+	/// let val_c = Qty::new( Num::new( 1.0 ), Unit::Tonne );
+	/// assert!( val_a == val_b );
+	/// assert!( val_a == val_c );
+	/// assert!( val_b == val_c );
+	/// ```
+	fn eq( &self, other: &Qty ) -> bool {
+		self.as_f64().eq( &other.as_f64() )
 	}
 }
 
