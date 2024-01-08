@@ -39,10 +39,25 @@
 // Modules
 
 
+mod prefix;
+pub use crate::prefix::PrefixError;
+pub use crate::prefix::Prefix;
+
 mod sinum;
+pub use crate::sinum::SiNum;
 
+
+
+
+//=============================================================================
+// Traits
+
+
+/// Providing conversion into LaTeX code.
+///
+/// This Trait is only available, if the **`tex`** feature has been enabled.
 #[cfg( feature = "tex" )]
-pub use crate::sinum::Latex;
-
-pub use crate::sinum::PrefixError;
-pub use crate::sinum::{SiNum, Prefix};
+pub trait Latex {
+	/// Converts the entity into a LaTeX-string.
+	fn to_latex( &self ) -> String;
+}
