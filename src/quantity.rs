@@ -154,17 +154,17 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Unit};
+	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Gram ).unwrap(), Qty::new( 9.9e3.into(), Unit::Gram ) );
 	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Tonne ).unwrap(), Qty::new( 0.0099.into(), Unit::Tonne ) );
 	/// assert!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Second ).is_err() );
 	/// ```
 	pub fn to_unit( &self, unit: Unit ) -> Result<Self, UnitError> {
-		let units = self.phys().units();
-		let Some( factor_new ) = units.get( &unit ) else {
+		if self.phys() != unit.phys() {
 			return Err( UnitError::UnitMismatch( vec![ self.unit(), unit ] ) );
 		};
 
-		let factor_old = units.get( &self.unit() ).clone()
-			.expect( "This unit is not assigned to a physical quantity, which it really should be!" );
+		let factor_old = self.unit().factor();
+		let factor_new = unit.factor();
 
 		let factor = factor_old / factor_new;
 

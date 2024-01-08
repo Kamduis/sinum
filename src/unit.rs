@@ -7,7 +7,7 @@
 // Crates
 
 
-use std::collections::HashMap;
+use std::collections::BTreeSet;
 use std::fmt;
 
 use thiserror::Error;
@@ -47,30 +47,30 @@ pub(super) enum PhysicalQuantity {
 
 impl PhysicalQuantity {
 	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
-	pub fn units( &self ) -> HashMap<Unit, f64> {
+	pub fn units( &self ) -> BTreeSet<Unit> {
 		match self {
-			Self::Current => HashMap::from( [
-				( Unit::Ampere, 1.0 ),
+			Self::Current => BTreeSet::from( [
+				Unit::Ampere,
 			] ),
-			Self::LuminousIntensity => HashMap::from( [
-				( Unit::Candela, 1.0 ),
+			Self::LuminousIntensity => BTreeSet::from( [
+				Unit::Candela,
 			] ),
-			Self::Temperature => HashMap::from( [
-				( Unit::Kelvin, 1.0 ),
+			Self::Temperature => BTreeSet::from( [
+				Unit::Kelvin,
 			] ),
-			Self::Mass => HashMap::from( [
-				( Unit::Gram, 1e-3 ),
-				( Unit::Kilogram, 1.0 ),
-				( Unit::Tonne, 1e3 ),
+			Self::Mass => BTreeSet::from( [
+				Unit::Gram,
+				Unit::Kilogram,
+				Unit::Tonne,
 			] ),
-			Self::Length => HashMap::from( [
-				( Unit::Meter, 1.0 ),
+			Self::Length => BTreeSet::from( [
+				Unit::Meter,
 			] ),
-			Self::Amount => HashMap::from( [
-				( Unit::Mole, 1.0 ),
+			Self::Amount => BTreeSet::from( [
+				Unit::Mole,
 			] ),
-			Self::Time => HashMap::from( [
-				( Unit::Second, 1.0 ),
+			Self::Time => BTreeSet::from( [
+				Unit::Second,
 			] ),
 		}
 	}
