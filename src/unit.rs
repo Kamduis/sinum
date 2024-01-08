@@ -113,6 +113,38 @@ impl Unit {
 			Self::Second =>    Dimension::Time,
 		}
 	}
+
+	/// Returns the factor between the unit and the base unit for the same physical quantity.
+	pub(super) fn factor( &self ) -> f64 {
+		match self {
+			// Base units
+			Self::Ampere |
+				Self::Candela |
+				Self::Kelvin |
+				Self::Kilogram |
+				Self::Meter |
+				Self::Mole |
+				Self::Second => 1.0,
+			Self::Gram => 1e-3,
+			Self::Tonne => 1e3,
+		}
+	}
+
+	/// Returns the base unit of the unit.
+	pub(super) fn base( &self ) -> Self {
+		match self {
+			// Base units
+			Self::Ampere =>    Self::Ampere,
+			Self::Candela =>   Self::Candela,
+			Self::Kelvin =>    Self::Kelvin,
+			Self::Kilogram =>  Self::Kilogram,
+			Self::Meter =>     Self::Meter,
+			Self::Mole =>      Self::Mole,
+			Self::Second =>    Self::Second,
+			//
+			Self::Gram | Self::Tonne => Self::Kilogram,
+		}
+	}
 }
 
 impl fmt::Display for Unit {
@@ -173,6 +205,20 @@ impl Latex for Unit {
 #[cfg( test )]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn unit_factor_to_base() {
+		assert_eq!( Unit::Ampere.factor(), 1.0 );
+		assert_eq!( Unit::Kilogram.factor(), 1.0 );
+		assert_eq!( Unit::Tonne.factor(), 1e3 );
+	}
+
+	#[test]
+	fn unit_base() {
+		assert_eq!( Unit::Ampere.base(), Unit::Ampere );
+		assert_eq!( Unit::Kilogram.base(), Unit::Kilogram );
+		assert_eq!( Unit::Tonne.base(), Unit::Kilogram );
+	}
 
 	#[test]
 	fn print_prefix() {
