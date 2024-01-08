@@ -420,6 +420,34 @@ impl SiNum {
 	}
 }
 
+impl PartialEq for SiNum {
+	/// Compares `SiNum`s for equality. Since a `SiNum` always represents a floating point number all of the pityfalls of comparing those apply.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// assert!( SiNum::new( 1.1 ) == SiNum::new( 1.1 ) );
+	/// assert!( SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) == SiNum::new( 2e6 ).with_prefix( Prefix::Milli ) );
+	/// ```
+	fn eq( &self, other: &Self ) -> bool {
+		self.as_f64().eq( &other.as_f64() )
+	}
+}
+
+impl PartialEq<f64> for SiNum {
+	/// Compares a `SiNum` and a `f64` for equality.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{SiNum, Prefix};
+	/// assert!( SiNum::new( 1.1 ) == 1.1 );
+	/// assert!( SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) == 2e3 );
+	/// ```
+	fn eq( &self, other: &f64 ) -> bool {
+		self.as_f64().eq( &other )
+	}
+}
+
 impl PartialOrd for SiNum {
 	fn partial_cmp( &self, other: &Self ) -> Option<Ordering> {
 		self.as_f64().partial_cmp( &other.as_f64() )
@@ -461,34 +489,6 @@ impl PartialOrd<f64> for SiNum {
 
 	fn gt( &self, other: &f64 ) -> bool {
 		self.as_f64() > *other
-	}
-}
-
-impl PartialEq for SiNum {
-	/// Compares `SiNum`s for equality. Since a `SiNum` always represents a floating point number all of the pityfalls of comparing those apply.
-	///
-	/// # Example
-	/// ```
-	/// # use sinum::{SiNum, Prefix};
-	/// assert!( SiNum::new( 1.1 ) == SiNum::new( 1.1 ) );
-	/// assert!( SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) == SiNum::new( 2e6 ).with_prefix( Prefix::Milli ) );
-	/// ```
-	fn eq( &self, other: &Self ) -> bool {
-		self.as_f64().eq( &other.as_f64() )
-	}
-}
-
-impl PartialEq<f64> for SiNum {
-	/// Compares a `SiNum` and a `f64` for equality.
-	///
-	/// # Example
-	/// ```
-	/// # use sinum::{SiNum, Prefix};
-	/// assert!( SiNum::new( 1.1 ) == 1.1 );
-	/// assert!( SiNum::new( 2.0 ).with_prefix( Prefix::Kilo ) == 2e3 );
-	/// ```
-	fn eq( &self, other: &f64 ) -> bool {
-		self.as_f64().eq( &other )
 	}
 }
 
