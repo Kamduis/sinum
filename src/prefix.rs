@@ -11,6 +11,9 @@ use std::fmt;
 
 use thiserror::Error;
 
+#[cfg( feature = "serde" )]
+use serde::{Serialize, Deserialize};
+
 #[cfg( feature = "tex" )]
 use crate::Latex;
 #[cfg( feature = "tex" )]
@@ -40,6 +43,7 @@ pub enum PrefixError {
 
 
 /// Represents the different SI prefixes like kilo, milli, nano etc.
+#[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
 #[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Debug )]
 pub enum Prefix {
 	Yocto,
