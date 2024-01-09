@@ -559,9 +559,8 @@ impl Latex for Qty {
 	/// );
 	/// assert_eq!(
 	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_latex(
-	/// 		&Options::builder()
-	/// 			.minimum_decimal_digits( Some( 1 ) )
-	/// 			.build()
+	/// 		&Options::new()
+	/// 			.minimum_decimal_digits( 1 )
 	/// 	),
 	/// 	r"\qty{9.9}{\gram}".to_string()
 	/// );

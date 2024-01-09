@@ -49,9 +49,14 @@ impl Options {
 		Options::default()
 	}
 
-	// Provide the builder to help the user discover it.
-	pub fn builder() -> OptionsBuilder {
-		OptionsBuilder::default()
+	pub fn drop_zero_decimal( mut self, sw: bool ) -> Options {
+		self.drop_zero_decimal = Some( sw );
+		self
+	}
+
+	pub fn minimum_decimal_digits( mut self, digits: u8 ) -> Options {
+		self.minimum_decimal_digits = Some( digits );
+		self
 	}
 }
 
@@ -60,39 +65,6 @@ impl fmt::Display for Options {
 		match self.drop_zero_decimal {
 			Some( x ) if x => write!( f, "[drop-zero-decimal]" ),
 			_ => write!( f, "" ),
-		}
-	}
-}
-
-
-
-
-#[derive( PartialEq, Default )]
-pub struct OptionsBuilder {
-	drop_zero_decimal: bool,
-	minimum_decimal_digits: Option<u8>,
-}
-
-impl OptionsBuilder {
-	pub fn new() -> OptionsBuilder {
-		// Set the minimally required fields.
-		OptionsBuilder::default()
-	}
-
-	pub fn drop_zero_decimal( mut self, sw: bool ) -> OptionsBuilder {
-		self.drop_zero_decimal = sw;
-		self
-	}
-
-	pub fn minimum_decimal_digits( mut self, digits: Option<u8> ) -> OptionsBuilder {
-		self.minimum_decimal_digits = digits;
-		self
-	}
-
-	pub fn build( self ) -> Options {
-		Options {
-			drop_zero_decimal: if self.drop_zero_decimal { Some( self.drop_zero_decimal ) } else { None },
-			minimum_decimal_digits: self.minimum_decimal_digits,
 		}
 	}
 }
@@ -114,7 +86,7 @@ mod tests {
 			drop_zero_decimal: Some( true ),
 			..Default::default()
 		};
-		let opts_from_builder: Options = OptionsBuilder::new().drop_zero_decimal( true ).build();
+		let opts_from_builder: Options = Options::new().drop_zero_decimal( true );
 		assert_eq!( opts, opts_from_builder );
 	}
 
@@ -122,9 +94,8 @@ mod tests {
 	fn options_to_string() {
 		assert_eq!( Options::default().to_string(), "".to_string() );
 		assert_eq!(
-			Options::builder()
+			Options::new()
 				.drop_zero_decimal( true )
-				.build()
 				.to_string(),
 			"[drop-zero-decimal]".to_string()
 		);
