@@ -29,7 +29,8 @@
 //! ```
 //!
 //! # Optional Features
-//! * **tex** Enables returning `Prefix`es and `Num`s as strings usable directly by LaTeX (requires the `{siunitx}` LaTeX-package.
+//! * **serde** Enables `serde` support.
+//! * **tex** Enables returning `Prefix`es and `Num`s as strings usable directly by LaTeX (requires the `{siunitx}` LaTeX-package).
 
 
 
