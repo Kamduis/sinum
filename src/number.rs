@@ -11,6 +11,9 @@ use std::cmp::Ordering;
 use std::ops::{Add, Sub, Mul, Div, Neg};
 use std::fmt;
 
+#[cfg( feature = "serde" )]
+use serde::{Serialize, Deserialize};
+
 use crate::PrefixError;
 use crate::{Prefix, Qty, Unit};
 
@@ -22,6 +25,7 @@ use crate::{Prefix, Qty, Unit};
 
 
 /// Represents a number in combination with a SI prefix.
+#[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
 #[derive( Clone, Copy, Debug )]
 pub struct Num {
 	mantissa: f64,

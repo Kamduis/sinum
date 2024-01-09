@@ -11,6 +11,9 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, Sub, Mul, Div, Neg};
 
+#[cfg( feature = "serde" )]
+use serde::{Serialize, Deserialize};
+
 #[cfg( feature = "tex" )]
 use crate::Latex;
 #[cfg( feature = "tex" )]
@@ -28,6 +31,7 @@ use crate::{Num, Prefix, Unit, PhysicalQuantity};
 
 
 /// Represents a number in combination with a SI prefix.
+#[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
 #[derive( Clone, Copy, Debug )]
 pub struct Qty {
 	number: Num,

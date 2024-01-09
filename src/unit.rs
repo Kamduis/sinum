@@ -10,6 +10,8 @@
 use std::collections::BTreeSet;
 use std::fmt;
 
+#[cfg( feature = "serde" )]
+use serde::{Serialize, Deserialize};
 use thiserror::Error;
 
 #[cfg( feature = "tex" )]
@@ -88,6 +90,7 @@ impl From<Unit> for PhysicalQuantity {
 
 
 /// Represents the different SI units.
+#[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
 #[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
 pub enum Unit {
 	// Base units
