@@ -606,6 +606,11 @@ mod tests {
 	use crate::Prefix;
 
 	#[test]
+	fn qty_eq() {
+		assert!( Qty::new( 10e3.into(), Unit::Kilogram ) == Qty::new( 10.0.into(), Unit::Tonne ) );
+	}
+
+	#[test]
 	fn siqty_as_f64() {
 		// `as_f64()` returns the value with regard to the base unit.
 		assert_eq!( Qty::new( 9.9.into(), Unit::Tonne ).as_f64(), 9.9e3 );
