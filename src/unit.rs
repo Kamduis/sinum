@@ -52,7 +52,7 @@ pub(super) enum PhysicalQuantity {
 
 impl PhysicalQuantity {
 	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
-	pub fn units( &self ) -> BTreeSet<Unit> {
+	pub(super) fn units( &self ) -> BTreeSet<Unit> {
 		match self {
 			Self::Current => BTreeSet::from( [
 				Unit::Ampere,
