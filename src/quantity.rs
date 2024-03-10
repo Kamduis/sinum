@@ -9,7 +9,7 @@
 
 use std::cmp::Ordering;
 use std::fmt;
-use std::ops::{Add, Sub, Mul, Div, Neg};
+use std::ops::{Add, Sub, Mul, MulAssign, Div, Neg};
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
@@ -450,6 +450,30 @@ impl Mul<f64> for Qty {
 		Self::new( val.into(), self.unit.base() )
 			.to_unit( self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
+	}
+}
+
+impl MulAssign<f64> for Qty {
+	/// The multiplication operator `*=`. `self` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Qty, Num, Unit, Prefix};
+	/// let mut calc_a = Qty::new( 1.0.into(), Unit::Ampere );
+	/// calc_a *= 0.1;
+	///
+	/// assert_eq!( calc_a, Qty::new( 0.1.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
+	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	///
+	/// let mut calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram );
+	/// calc_b *= 4.0;
+	///
+	/// assert_eq!( calc_b, Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
+	/// ```
+	fn mul_assign( &mut self, rhs: f64 ) {
+		self.number *= rhs;
 	}
 }
 
