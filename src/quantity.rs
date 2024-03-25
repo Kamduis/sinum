@@ -32,7 +32,7 @@ use crate::{Num, Prefix, Unit, PhysicalQuantity};
 
 /// Represents a number in combination with a SI prefix.
 #[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
-#[derive( Clone, Copy, Debug )]
+#[derive( Clone, Debug )]
 pub struct Qty {
 	number: Num,
 	unit: Unit,
@@ -47,7 +47,7 @@ impl Qty {
 	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).as_f64(), 9.9 );
 	/// assert_eq!( Qty::new( 99.9.into(), Unit::Kelvin ).as_f64(), 99.9 );
 	/// ```
-	pub fn new( number: Num, unit: Unit ) -> Self {
+	pub fn new( number: Num, unit: &Unit ) -> Self {
 		let ( num, uni ) = match unit {
 			// The Kilogram as base unit must only be used if the number prefix is `Prefix::Nothing`. If the Prefix is anything else, the unit `Unit::Gram` must be used to correctly display the prefixes like "mg" or "ng".
 			Unit::Kilogram if number.prefix() != Prefix::Nothing => {
@@ -58,7 +58,7 @@ impl Qty {
 			Unit::Gram if number.prefix() == Prefix::Kilo => {
 				( number.with_prefix( Prefix::Nothing ), Unit::Kilogram )
 			},
-			_ => ( number, unit ),
+			_ => ( number, unit.clone() ),
 		};
 
 		Self {
@@ -125,8 +125,8 @@ impl Qty {
 	/// # use sinum::{Qty, Unit};
 	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).unit(), Unit::Ampere );
 	/// ```
-	pub fn unit( &self ) -> Unit {
-		self.unit
+	pub fn unit( &self ) -> &Unit {
+		&self.unit
 	}
 
 	/// Returns the physical quantity that is represented by the `Qty`.
@@ -152,7 +152,7 @@ impl Qty {
 	/// ```
 	pub fn to_prefix( self, prefix: Prefix ) -> Self {
 		let number = self.number.to_prefix( prefix );
-		Self::new( number, self.unit )
+		Self::new( number, &self.unit )
 	}
 
 	/// Returns a new `Qty` from `self` with the new `unit`.
@@ -166,9 +166,9 @@ impl Qty {
 	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Tonne ).unwrap(), Qty::new( 0.0099.into(), Unit::Tonne ) );
 	/// assert!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Second ).is_err() );
 	/// ```
-	pub fn to_unit( &self, unit: Unit ) -> Result<Self, UnitError> {
+	pub fn to_unit( &self, unit: &Unit ) -> Result<Self, UnitError> {
 		if self.phys() != unit.phys() {
-			return Err( UnitError::UnitMismatch( vec![ self.unit(), unit ] ) );
+			return Err( UnitError::UnitMismatch( vec![ self.unit().clone(), unit.clone() ] ) );
 		};
 
 		let factor_old = self.unit().factor();
@@ -306,8 +306,8 @@ impl Add for Qty {
 	fn add( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() + other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -334,8 +334,8 @@ impl Add<f64> for Qty {
 	fn add( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() + other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -364,8 +364,8 @@ impl Sub for Qty {
 	fn sub( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() - other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -392,8 +392,8 @@ impl Sub<f64> for Qty {
 	fn sub( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() - other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -419,8 +419,8 @@ impl Mul for Qty {
 	fn mul( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() * other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -447,8 +447,8 @@ impl Mul<f64> for Qty {
 	fn mul( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() * other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -499,8 +499,8 @@ impl Div for Qty {
 	fn div( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() / other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -527,8 +527,8 @@ impl Div<f64> for Qty {
 	fn div( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() / other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -540,7 +540,7 @@ impl Neg for Qty {
 		let val = -self.as_f64();
 		let num = Num::new( val ).to_prefix( self.number.prefix() );
 
-		Self::new( num, self.unit.base() ).to_unit( self.unit ).unwrap()
+		Self::new( num, &self.unit.base() ).to_unit( &self.unit ).unwrap()
 	}
 }
 

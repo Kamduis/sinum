@@ -41,6 +41,7 @@ pub enum UnitError {
 
 #[derive( PartialEq, Eq, Debug )]
 pub(super) enum PhysicalQuantity {
+	Custom,
 	Current,
 	LuminousIntensity,
 	Temperature,
@@ -54,6 +55,7 @@ impl PhysicalQuantity {
 	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
 	pub(super) fn units( &self ) -> BTreeSet<Unit> {
 		match self {
+			Self::Custom => BTreeSet::new(),
 			Self::Current => BTreeSet::from( [
 				Unit::Ampere,
 			] ),
@@ -91,8 +93,9 @@ impl From<Unit> for PhysicalQuantity {
 
 /// Represents the different SI units.
 #[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
-#[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
+#[derive( Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
 pub enum Unit {
+	Custom( String ),
 	// Base units
 	Ampere,
 	Candela,
@@ -110,6 +113,7 @@ impl Unit {
 	/// Returns the `PhysicalQuantity` that is measured by `self`.
 	pub(super) fn phys( &self ) -> PhysicalQuantity {
 		match self {
+			Self::Custom( _ ) => PhysicalQuantity::Custom,
 			// Base units
 			Self::Ampere =>    PhysicalQuantity::Current,
 			Self::Candela =>   PhysicalQuantity::LuminousIntensity,
@@ -124,6 +128,7 @@ impl Unit {
 	/// Returns the factor between the unit and the base unit for the same physical quantity.
 	pub(super) fn factor( &self ) -> f64 {
 		match self {
+			Self::Custom( _ ) => 1.0,
 			// Base units
 			Self::Ampere |
 				Self::Candela |
@@ -140,6 +145,7 @@ impl Unit {
 	/// Returns the base unit of the unit.
 	pub(super) fn base( &self ) -> Self {
 		match self {
+			Self::Custom( x ) => Self::Custom( x.clone() ),
 			// Base units
 			Self::Ampere =>    Self::Ampere,
 			Self::Candela =>   Self::Candela,
@@ -157,6 +163,7 @@ impl Unit {
 impl fmt::Display for Unit {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		match self {
+			Self::Custom( x ) => write!( f, "{}", x ),
 			// Base units
 			Self::Ampere =>    write!( f, "A" ),
 			Self::Candela =>   write!( f, "cd" ),
@@ -187,6 +194,7 @@ impl Latex for Unit {
 	/// ```
 	fn to_latex( &self, _options: &Options ) -> String {
 		match self {
+			Self::Custom( x ) => x.clone(),
 			// Base units
 			Self::Ampere =>    format!( r"\ampere" ),
 			Self::Candela =>   format!( r"\candela" ),

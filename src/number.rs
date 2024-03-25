@@ -72,7 +72,7 @@ impl Num {
 	/// # use sinum::{Num, Qty, Unit};
 	/// assert_eq!( Num::new( 9.9 ).with_unit( Unit::Second ), Qty::new( 9.9.into(), Unit::Second ) );
 	/// ```
-	pub fn with_unit( self, unit: Unit ) -> Qty {
+	pub fn with_unit( self, unit: &Unit ) -> Qty {
 		Qty::new( self, unit )
 	}
 
