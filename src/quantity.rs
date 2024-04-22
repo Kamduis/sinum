@@ -81,16 +81,16 @@ impl Qty {
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
 	/// assert_eq!(
-	/// 	Qty::new( 1000.0.into(), Unit::Ampere ).shorten().unwrap(),
-	/// 	Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), Unit::Ampere )
+	/// 	Qty::new( 1000.0.into(), &Unit::Ampere ).shortened().unwrap(),
+	/// 	Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), &Unit::Ampere )
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( 0.001.into(), Unit::Candela ).shorten().unwrap(),
-	/// 	Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), Unit::Candela )
+	/// 	Qty::new( 0.001.into(), &Unit::Candela ).shortened().unwrap(),
+	/// 	Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), &Unit::Candela )
 	/// );
 	/// ```
-	pub fn shorten( self ) -> Result<Self, PrefixError> {
-		let num = self.number.shorten()?;
+	pub fn shortened( self ) -> Result<Self, PrefixError> {
+		let num = self.number.shortened()?;
 
 		Ok( Self::new( num, self.unit() ) )
 	}

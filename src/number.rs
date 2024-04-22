@@ -112,23 +112,23 @@ impl Num {
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1000.0 ).shorten().unwrap(),
+	/// 	Num::new( 1000.0 ).shortened().unwrap(),
 	/// 	Num::new( 1.0 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.001 ).shorten().unwrap(),
+	/// 	Num::new( 0.001 ).shortened().unwrap(),
 	/// 	Num::new( 1.0 ).with_prefix( Prefix::Milli )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 1234.5 ).shorten().unwrap(),
+	/// 	Num::new( 1234.5 ).shortened().unwrap(),
 	/// 	Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shorten().unwrap(),
+	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
 	/// 	Num::new( 0.0 )
 	/// );
 	/// ```
-	pub fn shorten( self ) -> Result<Self, PrefixError> {
+	pub fn shortened( self ) -> Result<Self, PrefixError> {
 		if self.mantissa == 0.0 {
 			return Ok( Self::new( 0.0 ) );
 		}
