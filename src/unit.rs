@@ -7,7 +7,7 @@
 // Crates
 
 
-use std::collections::BTreeSet;
+// use std::collections::BTreeSet;
 use std::fmt;
 
 #[cfg( feature = "serde" )]
@@ -52,40 +52,40 @@ pub(super) enum PhysicalQuantity {
 	Radiation,
 }
 
-impl PhysicalQuantity {
-	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
-	pub(super) fn units( &self ) -> BTreeSet<Unit> {
-		match self {
-			Self::Custom => BTreeSet::new(),
-			Self::Current => BTreeSet::from( [
-				Unit::Ampere,
-			] ),
-			Self::LuminousIntensity => BTreeSet::from( [
-				Unit::Candela,
-			] ),
-			Self::Temperature => BTreeSet::from( [
-				Unit::Kelvin,
-			] ),
-			Self::Mass => BTreeSet::from( [
-				Unit::Gram,
-				Unit::Kilogram,
-				Unit::Tonne,
-			] ),
-			Self::Length => BTreeSet::from( [
-				Unit::Meter,
-			] ),
-			Self::Amount => BTreeSet::from( [
-				Unit::Mole,
-			] ),
-			Self::Time => BTreeSet::from( [
-				Unit::Second,
-			] ),
-			Self::Radiation => BTreeSet::from( [
-				Unit::Sievert,
-			] ),
-		}
-	}
-}
+// impl PhysicalQuantity {
+// 	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
+// 	pub(super) fn units( &self ) -> BTreeSet<Unit> {
+// 		match self {
+// 			Self::Custom => BTreeSet::new(),
+// 			Self::Current => BTreeSet::from( [
+// 				Unit::Ampere,
+// 			] ),
+// 			Self::LuminousIntensity => BTreeSet::from( [
+// 				Unit::Candela,
+// 			] ),
+// 			Self::Temperature => BTreeSet::from( [
+// 				Unit::Kelvin,
+// 			] ),
+// 			Self::Mass => BTreeSet::from( [
+// 				Unit::Gram,
+// 				Unit::Kilogram,
+// 				Unit::Tonne,
+// 			] ),
+// 			Self::Length => BTreeSet::from( [
+// 				Unit::Meter,
+// 			] ),
+// 			Self::Amount => BTreeSet::from( [
+// 				Unit::Mole,
+// 			] ),
+// 			Self::Time => BTreeSet::from( [
+// 				Unit::Second,
+// 			] ),
+// 			Self::Radiation => BTreeSet::from( [
+// 				Unit::Sievert,
+// 			] ),
+// 		}
+// 	}
+// }
 
 impl From<Unit> for PhysicalQuantity {
 	/// Returns the `PhysicalQuantity` that is measured by `item`.
