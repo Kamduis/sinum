@@ -107,6 +107,10 @@ pub enum Unit {
 	// Additional mass units
 	Gram,
 	Tonne,
+	// Additional length units
+	AstronomicalUnit,
+	Lightyear,
+	Parsec,
 }
 
 impl Unit {
@@ -118,8 +122,11 @@ impl Unit {
 			Self::Ampere =>    PhysicalQuantity::Current,
 			Self::Candela =>   PhysicalQuantity::LuminousIntensity,
 			Self::Kelvin =>    PhysicalQuantity::Temperature,
-			Self::Kilogram | Self::Gram | Self::Tonne =>  PhysicalQuantity::Mass,
-			Self::Meter =>     PhysicalQuantity::Length,
+			Self::Kilogram | Self::Gram | Self::Tonne => PhysicalQuantity::Mass,
+			Self::Meter |
+				Self::AstronomicalUnit |
+				Self::Lightyear |
+				Self::Parsec => PhysicalQuantity::Length,
 			Self::Mole =>      PhysicalQuantity::Amount,
 			Self::Second =>    PhysicalQuantity::Time,
 		}
@@ -139,6 +146,9 @@ impl Unit {
 				Self::Second => 1.0,
 			Self::Gram => 1e-3,
 			Self::Tonne => 1e3,
+			Self::AstronomicalUnit => 149_597_870_700.0,
+			Self::Lightyear => 9_460_730_472_580_800.0,
+			Self::Parsec => 30.85677581e15,
 		}
 	}
 
@@ -156,6 +166,7 @@ impl Unit {
 			Self::Second =>    Self::Second,
 			//
 			Self::Gram | Self::Tonne => Self::Kilogram,
+			Self::AstronomicalUnit | Self::Lightyear | Self::Parsec => Self::Meter,
 		}
 	}
 }
@@ -175,6 +186,10 @@ impl fmt::Display for Unit {
 			// Additional mass units
 			Self::Gram =>      write!( f, "g" ),
 			Self::Tonne =>     write!( f, "t" ),
+			// Additional length units
+			Self::AstronomicalUnit => write!( f, "AU" ),
+			Self::Lightyear => write!( f, "ly" ),
+			Self::Parsec =>    write!( f, "pc" ),
 		}
 	}
 }
@@ -206,6 +221,10 @@ impl Latex for Unit {
 			// Additional mass units
 			Self::Gram =>      format!( r"\gram" ),
 			Self::Tonne =>     format!( r"\tonne" ),
+			// Additional length units
+			Self::AstronomicalUnit => format!( r"\astronomicalunit" ),
+			Self::Lightyear => format!( r"\lightyear" ),
+			Self::Parsec =>    format!( r"\parsec" ),
 		}
 	}
 }
