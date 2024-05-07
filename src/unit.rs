@@ -49,6 +49,7 @@ pub(super) enum PhysicalQuantity {
 	Length,
 	Amount,
 	Time,
+	Radiation,
 }
 
 impl PhysicalQuantity {
@@ -78,6 +79,9 @@ impl PhysicalQuantity {
 			] ),
 			Self::Time => BTreeSet::from( [
 				Unit::Second,
+			] ),
+			Self::Radiation => BTreeSet::from( [
+				Unit::Sievert,
 			] ),
 		}
 	}
@@ -111,6 +115,8 @@ pub enum Unit {
 	AstronomicalUnit,
 	Lightyear,
 	Parsec,
+	//
+	Sievert,
 }
 
 impl Unit {
@@ -129,6 +135,7 @@ impl Unit {
 				Self::Parsec => PhysicalQuantity::Length,
 			Self::Mole =>      PhysicalQuantity::Amount,
 			Self::Second =>    PhysicalQuantity::Time,
+			Self::Sievert =>   PhysicalQuantity::Radiation,
 		}
 	}
 
@@ -143,7 +150,8 @@ impl Unit {
 				Self::Kilogram |
 				Self::Meter |
 				Self::Mole |
-				Self::Second => 1.0,
+				Self::Second |
+				Self::Sievert => 1.0,
 			Self::Gram => 1e-3,
 			Self::Tonne => 1e3,
 			Self::AstronomicalUnit => 149_597_870_700.0,
@@ -167,6 +175,8 @@ impl Unit {
 			//
 			Self::Gram | Self::Tonne => Self::Kilogram,
 			Self::AstronomicalUnit | Self::Lightyear | Self::Parsec => Self::Meter,
+			//
+			Self::Sievert =>   Self::Sievert,
 		}
 	}
 }
@@ -190,6 +200,8 @@ impl fmt::Display for Unit {
 			Self::AstronomicalUnit => write!( f, "AU" ),
 			Self::Lightyear => write!( f, "ly" ),
 			Self::Parsec =>    write!( f, "pc" ),
+			//
+			Self::Sievert =>   write!( f, "Sv" ),
 		}
 	}
 }
@@ -225,6 +237,8 @@ impl Latex for Unit {
 			Self::AstronomicalUnit => format!( r"\astronomicalunit" ),
 			Self::Lightyear => format!( r"\lightyear" ),
 			Self::Parsec =>    format!( r"\parsec" ),
+			//
+			Self::Sievert =>   format!( r"\sievert" ),
 		}
 	}
 }
