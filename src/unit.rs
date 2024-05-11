@@ -49,6 +49,7 @@ pub(super) enum PhysicalQuantity {
 	Length,
 	Amount,
 	Time,
+	Pressure,
 	Radiation,
 }
 
@@ -116,6 +117,8 @@ pub enum Unit {
 	Lightyear,
 	Parsec,
 	//
+	Pascal,
+	Bar,
 	Sievert,
 }
 
@@ -135,6 +138,7 @@ impl Unit {
 				Self::Parsec => PhysicalQuantity::Length,
 			Self::Mole =>      PhysicalQuantity::Amount,
 			Self::Second =>    PhysicalQuantity::Time,
+			Self::Pascal | Self::Bar => PhysicalQuantity::Pressure,
 			Self::Sievert =>   PhysicalQuantity::Radiation,
 		}
 	}
@@ -151,12 +155,14 @@ impl Unit {
 				Self::Meter |
 				Self::Mole |
 				Self::Second |
+				Self::Pascal |
 				Self::Sievert => 1.0,
 			Self::Gram => 1e-3,
 			Self::Tonne => 1e3,
 			Self::AstronomicalUnit => 149_597_870_700.0,
 			Self::Lightyear => 9_460_730_472_580_800.0,
 			Self::Parsec => 30.85677581e15,
+			Self::Bar => 1e5,
 		}
 	}
 
@@ -176,6 +182,8 @@ impl Unit {
 			Self::Gram | Self::Tonne => Self::Kilogram,
 			Self::AstronomicalUnit | Self::Lightyear | Self::Parsec => Self::Meter,
 			//
+			Self::Pascal =>    Self::Pascal,
+			Self::Bar =>       Self::Pascal,
 			Self::Sievert =>   Self::Sievert,
 		}
 	}
@@ -201,6 +209,8 @@ impl fmt::Display for Unit {
 			Self::Lightyear => write!( f, "ly" ),
 			Self::Parsec =>    write!( f, "pc" ),
 			//
+			Self::Pascal =>    write!( f, "Pa" ),
+			Self::Bar =>       write!( f, "bar" ),
 			Self::Sievert =>   write!( f, "Sv" ),
 		}
 	}
@@ -238,6 +248,8 @@ impl Latex for Unit {
 			Self::Lightyear => format!( r"\lightyear" ),
 			Self::Parsec =>    format!( r"\parsec" ),
 			//
+			Self::Pascal =>    format!( r"\pascal" ),
+			Self::Bar =>       format!( r"\bar" ),
 			Self::Sievert =>   format!( r"\sievert" ),
 		}
 	}
