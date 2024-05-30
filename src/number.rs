@@ -8,7 +8,7 @@
 
 
 use std::cmp::Ordering;
-use std::ops::{Add, Sub, Mul, Div, Neg};
+use std::ops::{Add, Sub, Mul, MulAssign, Div, Neg};
 use std::fmt;
 
 #[cfg( feature = "serde" )]
@@ -70,9 +70,9 @@ impl Num {
 	/// # Example
 	/// ```
 	/// # use sinum::{Num, Qty, Unit};
-	/// assert_eq!( Num::new( 9.9 ).with_unit( Unit::Second ), Qty::new( 9.9.into(), Unit::Second ) );
+	/// assert_eq!( Num::new( 9.9 ).with_unit( &Unit::Second ), Qty::new( 9.9.into(), &Unit::Second ) );
 	/// ```
-	pub fn with_unit( self, unit: Unit ) -> Qty {
+	pub fn with_unit( self, unit: &Unit ) -> Qty {
 		Qty::new( self, unit )
 	}
 
@@ -112,23 +112,23 @@ impl Num {
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1000.0 ).shorten().unwrap(),
+	/// 	Num::new( 1000.0 ).shortened().unwrap(),
 	/// 	Num::new( 1.0 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.001 ).shorten().unwrap(),
+	/// 	Num::new( 0.001 ).shortened().unwrap(),
 	/// 	Num::new( 1.0 ).with_prefix( Prefix::Milli )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 1234.5 ).shorten().unwrap(),
+	/// 	Num::new( 1234.5 ).shortened().unwrap(),
 	/// 	Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shorten().unwrap(),
+	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
 	/// 	Num::new( 0.0 )
 	/// );
 	/// ```
-	pub fn shorten( self ) -> Result<Self, PrefixError> {
+	pub fn shortened( self ) -> Result<Self, PrefixError> {
 		if self.mantissa == 0.0 {
 			return Ok( Self::new( 0.0 ) );
 		}
@@ -467,6 +467,29 @@ impl Mul<f64> for Num {
 		let val = self.as_f64() * other;
 
 		Self::new( val ).to_prefix( self.prefix() )
+	}
+}
+
+impl MulAssign<f64> for Num {
+	/// The multiplication assignment operator `*=`. The resulting `Num` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Num, Prefix};
+	/// let mut calc_a = Num::new( 1.0 );
+	/// calc_a *= 0.1;
+	///
+	/// assert_eq!( calc_a, Num::new( 0.1 ) );
+	/// assert_eq!( calc_a.prefix(), Prefix::Nothing );
+	///
+	/// let mut calc_b = Num::new( 2.0 ).with_prefix( Prefix::Kilo );
+	/// calc_b *= 4.0;
+	///
+	/// assert_eq!( calc_b, Num::new( 8.0 ).with_prefix( Prefix::Kilo ) );
+	/// assert_eq!( calc_b.prefix(), Prefix::Kilo );
+	/// ```
+	fn mul_assign( &mut self, rhs: f64 ) {
+		self.mantissa *= rhs;
 	}
 }
 

@@ -7,7 +7,7 @@
 // Crates
 
 
-use std::collections::BTreeSet;
+// use std::collections::BTreeSet;
 use std::fmt;
 
 #[cfg( feature = "serde" )]
@@ -41,6 +41,7 @@ pub enum UnitError {
 
 #[derive( PartialEq, Eq, Debug )]
 pub(super) enum PhysicalQuantity {
+	Custom,
 	Current,
 	LuminousIntensity,
 	Temperature,
@@ -48,38 +49,44 @@ pub(super) enum PhysicalQuantity {
 	Length,
 	Amount,
 	Time,
+	Pressure,
+	Radiation,
 }
 
-impl PhysicalQuantity {
-	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
-	pub fn units( &self ) -> BTreeSet<Unit> {
-		match self {
-			Self::Current => BTreeSet::from( [
-				Unit::Ampere,
-			] ),
-			Self::LuminousIntensity => BTreeSet::from( [
-				Unit::Candela,
-			] ),
-			Self::Temperature => BTreeSet::from( [
-				Unit::Kelvin,
-			] ),
-			Self::Mass => BTreeSet::from( [
-				Unit::Gram,
-				Unit::Kilogram,
-				Unit::Tonne,
-			] ),
-			Self::Length => BTreeSet::from( [
-				Unit::Meter,
-			] ),
-			Self::Amount => BTreeSet::from( [
-				Unit::Mole,
-			] ),
-			Self::Time => BTreeSet::from( [
-				Unit::Second,
-			] ),
-		}
-	}
-}
+// impl PhysicalQuantity {
+// 	/// Returns the available units for this `PhysicalQuantity` and the factor to the base unit.
+// 	pub(super) fn units( &self ) -> BTreeSet<Unit> {
+// 		match self {
+// 			Self::Custom => BTreeSet::new(),
+// 			Self::Current => BTreeSet::from( [
+// 				Unit::Ampere,
+// 			] ),
+// 			Self::LuminousIntensity => BTreeSet::from( [
+// 				Unit::Candela,
+// 			] ),
+// 			Self::Temperature => BTreeSet::from( [
+// 				Unit::Kelvin,
+// 			] ),
+// 			Self::Mass => BTreeSet::from( [
+// 				Unit::Gram,
+// 				Unit::Kilogram,
+// 				Unit::Tonne,
+// 			] ),
+// 			Self::Length => BTreeSet::from( [
+// 				Unit::Meter,
+// 			] ),
+// 			Self::Amount => BTreeSet::from( [
+// 				Unit::Mole,
+// 			] ),
+// 			Self::Time => BTreeSet::from( [
+// 				Unit::Second,
+// 			] ),
+// 			Self::Radiation => BTreeSet::from( [
+// 				Unit::Sievert,
+// 			] ),
+// 		}
+// 	}
+// }
 
 impl From<Unit> for PhysicalQuantity {
 	/// Returns the `PhysicalQuantity` that is measured by `item`.
@@ -91,8 +98,9 @@ impl From<Unit> for PhysicalQuantity {
 
 /// Represents the different SI units.
 #[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
-#[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
+#[derive( Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Debug )]
 pub enum Unit {
+	Custom( String ),
 	// Base units
 	Ampere,
 	Candela,
@@ -104,26 +112,41 @@ pub enum Unit {
 	// Additional mass units
 	Gram,
 	Tonne,
+	// Additional length units
+	AstronomicalUnit,
+	Lightyear,
+	Parsec,
+	//
+	Pascal,
+	Bar,
+	Sievert,
 }
 
 impl Unit {
 	/// Returns the `PhysicalQuantity` that is measured by `self`.
 	pub(super) fn phys( &self ) -> PhysicalQuantity {
 		match self {
+			Self::Custom( _ ) => PhysicalQuantity::Custom,
 			// Base units
 			Self::Ampere =>    PhysicalQuantity::Current,
 			Self::Candela =>   PhysicalQuantity::LuminousIntensity,
 			Self::Kelvin =>    PhysicalQuantity::Temperature,
-			Self::Kilogram | Self::Gram | Self::Tonne =>  PhysicalQuantity::Mass,
-			Self::Meter =>     PhysicalQuantity::Length,
+			Self::Kilogram | Self::Gram | Self::Tonne => PhysicalQuantity::Mass,
+			Self::Meter |
+				Self::AstronomicalUnit |
+				Self::Lightyear |
+				Self::Parsec => PhysicalQuantity::Length,
 			Self::Mole =>      PhysicalQuantity::Amount,
 			Self::Second =>    PhysicalQuantity::Time,
+			Self::Pascal | Self::Bar => PhysicalQuantity::Pressure,
+			Self::Sievert =>   PhysicalQuantity::Radiation,
 		}
 	}
 
 	/// Returns the factor between the unit and the base unit for the same physical quantity.
 	pub(super) fn factor( &self ) -> f64 {
 		match self {
+			Self::Custom( _ ) => 1.0,
 			// Base units
 			Self::Ampere |
 				Self::Candela |
@@ -131,15 +154,22 @@ impl Unit {
 				Self::Kilogram |
 				Self::Meter |
 				Self::Mole |
-				Self::Second => 1.0,
+				Self::Second |
+				Self::Pascal |
+				Self::Sievert => 1.0,
 			Self::Gram => 1e-3,
 			Self::Tonne => 1e3,
+			Self::AstronomicalUnit => 149_597_870_700.0,
+			Self::Lightyear => 9_460_730_472_580_800.0,
+			Self::Parsec => 30.85677581e15,
+			Self::Bar => 1e5,
 		}
 	}
 
 	/// Returns the base unit of the unit.
 	pub(super) fn base( &self ) -> Self {
 		match self {
+			Self::Custom( x ) => Self::Custom( x.clone() ),
 			// Base units
 			Self::Ampere =>    Self::Ampere,
 			Self::Candela =>   Self::Candela,
@@ -150,6 +180,11 @@ impl Unit {
 			Self::Second =>    Self::Second,
 			//
 			Self::Gram | Self::Tonne => Self::Kilogram,
+			Self::AstronomicalUnit | Self::Lightyear | Self::Parsec => Self::Meter,
+			//
+			Self::Pascal =>    Self::Pascal,
+			Self::Bar =>       Self::Pascal,
+			Self::Sievert =>   Self::Sievert,
 		}
 	}
 }
@@ -157,6 +192,7 @@ impl Unit {
 impl fmt::Display for Unit {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		match self {
+			Self::Custom( x ) => write!( f, "{}", x ),
 			// Base units
 			Self::Ampere =>    write!( f, "A" ),
 			Self::Candela =>   write!( f, "cd" ),
@@ -168,6 +204,14 @@ impl fmt::Display for Unit {
 			// Additional mass units
 			Self::Gram =>      write!( f, "g" ),
 			Self::Tonne =>     write!( f, "t" ),
+			// Additional length units
+			Self::AstronomicalUnit => write!( f, "AU" ),
+			Self::Lightyear => write!( f, "ly" ),
+			Self::Parsec =>    write!( f, "pc" ),
+			//
+			Self::Pascal =>    write!( f, "Pa" ),
+			Self::Bar =>       write!( f, "bar" ),
+			Self::Sievert =>   write!( f, "Sv" ),
 		}
 	}
 }
@@ -187,6 +231,7 @@ impl Latex for Unit {
 	/// ```
 	fn to_latex( &self, _options: &Options ) -> String {
 		match self {
+			Self::Custom( x ) => x.clone(),
 			// Base units
 			Self::Ampere =>    format!( r"\ampere" ),
 			Self::Candela =>   format!( r"\candela" ),
@@ -198,6 +243,14 @@ impl Latex for Unit {
 			// Additional mass units
 			Self::Gram =>      format!( r"\gram" ),
 			Self::Tonne =>     format!( r"\tonne" ),
+			// Additional length units
+			Self::AstronomicalUnit => format!( r"\astronomicalunit" ),
+			Self::Lightyear => format!( r"\lightyear" ),
+			Self::Parsec =>    format!( r"\parsec" ),
+			//
+			Self::Pascal =>    format!( r"\pascal" ),
+			Self::Bar =>       format!( r"\bar" ),
+			Self::Sievert =>   format!( r"\sievert" ),
 		}
 	}
 }

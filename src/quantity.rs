@@ -9,7 +9,7 @@
 
 use std::cmp::Ordering;
 use std::fmt;
-use std::ops::{Add, Sub, Mul, Div, Neg};
+use std::ops::{Add, Sub, Mul, MulAssign, Div, Neg};
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
@@ -32,7 +32,7 @@ use crate::{Num, Prefix, Unit, PhysicalQuantity};
 
 /// Represents a number in combination with a SI prefix.
 #[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
-#[derive( Clone, Copy, Debug )]
+#[derive( Clone, Debug )]
 pub struct Qty {
 	number: Num,
 	unit: Unit,
@@ -44,10 +44,10 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Unit};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).as_f64(), 9.9 );
-	/// assert_eq!( Qty::new( 99.9.into(), Unit::Kelvin ).as_f64(), 99.9 );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).as_f64(), 9.9 );
+	/// assert_eq!( Qty::new( 99.9.into(), &Unit::Kelvin ).as_f64(), 99.9 );
 	/// ```
-	pub fn new( number: Num, unit: Unit ) -> Self {
+	pub fn new( number: Num, unit: &Unit ) -> Self {
 		let ( num, uni ) = match unit {
 			// The Kilogram as base unit must only be used if the number prefix is `Prefix::Nothing`. If the Prefix is anything else, the unit `Unit::Gram` must be used to correctly display the prefixes like "mg" or "ng".
 			Unit::Kilogram if number.prefix() != Prefix::Nothing => {
@@ -58,7 +58,7 @@ impl Qty {
 			Unit::Gram if number.prefix() == Prefix::Kilo => {
 				( number.with_prefix( Prefix::Nothing ), Unit::Kilogram )
 			},
-			_ => ( number, unit ),
+			_ => ( number, unit.clone() ),
 		};
 
 		Self {
@@ -81,16 +81,16 @@ impl Qty {
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
 	/// assert_eq!(
-	/// 	Qty::new( 1000.0.into(), Unit::Ampere ).shorten().unwrap(),
-	/// 	Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), Unit::Ampere )
+	/// 	Qty::new( 1000.0.into(), &Unit::Ampere ).shortened().unwrap(),
+	/// 	Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), &Unit::Ampere )
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( 0.001.into(), Unit::Candela ).shorten().unwrap(),
-	/// 	Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), Unit::Candela )
+	/// 	Qty::new( 0.001.into(), &Unit::Candela ).shortened().unwrap(),
+	/// 	Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), &Unit::Candela )
 	/// );
 	/// ```
-	pub fn shorten( self ) -> Result<Self, PrefixError> {
-		let num = self.number.shorten()?;
+	pub fn shortened( self ) -> Result<Self, PrefixError> {
+		let num = self.number.shortened()?;
 
 		Ok( Self::new( num, self.unit() ) )
 	}
@@ -100,8 +100,8 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Unit};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).as_f64(), 9.9 );
-	/// assert_eq!( Qty::new( 99.9.into(), Unit::Kelvin ).as_f64(), 99.9 );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).as_f64(), 9.9 );
+	/// assert_eq!( Qty::new( 99.9.into(), &Unit::Kelvin ).as_f64(), 99.9 );
 	/// ```
 	pub fn as_f64( &self ) -> f64 {
 		self.number.as_f64() * self.unit.factor()
@@ -112,7 +112,7 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Num, Qty, Unit};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).number(), Num::new( 9.9 ) );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).number(), Num::new( 9.9 ) );
 	/// ```
 	pub fn number( &self ) -> Num {
 		self.number
@@ -123,10 +123,10 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Unit};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).unit(), Unit::Ampere );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).unit(), &Unit::Ampere );
 	/// ```
-	pub fn unit( &self ) -> Unit {
-		self.unit
+	pub fn unit( &self ) -> &Unit {
+		&self.unit
 	}
 
 	/// Returns the physical quantity that is represented by the `Qty`.
@@ -141,18 +141,18 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Prefix, Unit};
-	/// let qty = Qty::new( 2.0.into(), Unit::Meter );
+	/// let qty = Qty::new( 2.0.into(), &Unit::Meter );
 	///
 	/// assert_eq!( qty.as_f64(), 2.0 );
-	/// assert_eq!( qty.to_prefix( Prefix::Milli ).as_f64(), 2.0 );
-	/// assert_eq!( qty.to_prefix( Prefix::Milli ).number().mantissa(), 2_000.0 );
+	/// assert_eq!( qty.clone().to_prefix( Prefix::Milli ).as_f64(), 2.0 );
+	/// assert_eq!( qty.clone().to_prefix( Prefix::Milli ).number().mantissa(), 2_000.0 );
 	///
-	/// assert_eq!( qty.to_prefix( Prefix::Kilo ).as_f64(), 2.0 );
+	/// assert_eq!( qty.clone().to_prefix( Prefix::Kilo ).as_f64(), 2.0 );
 	/// assert_eq!( qty.to_prefix( Prefix::Kilo ).number().mantissa(), 0.002 );
 	/// ```
 	pub fn to_prefix( self, prefix: Prefix ) -> Self {
 		let number = self.number.to_prefix( prefix );
-		Self::new( number, self.unit )
+		Self::new( number, &self.unit )
 	}
 
 	/// Returns a new `Qty` from `self` with the new `unit`.
@@ -162,13 +162,13 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Unit};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Gram ).unwrap(), Qty::new( 9.9e3.into(), Unit::Gram ) );
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Tonne ).unwrap(), Qty::new( 0.0099.into(), Unit::Tonne ) );
-	/// assert!( Qty::new( 9.9.into(), Unit::Kilogram ).to_unit( Unit::Second ).is_err() );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_unit( &Unit::Gram ).unwrap(), Qty::new( 9.9e3.into(), &Unit::Gram ) );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_unit( &Unit::Tonne ).unwrap(), Qty::new( 0.0099.into(), &Unit::Tonne ) );
+	/// assert!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_unit( &Unit::Second ).is_err() );
 	/// ```
-	pub fn to_unit( &self, unit: Unit ) -> Result<Self, UnitError> {
+	pub fn to_unit( &self, unit: &Unit ) -> Result<Self, UnitError> {
 		if self.phys() != unit.phys() {
-			return Err( UnitError::UnitMismatch( vec![ self.unit(), unit ] ) );
+			return Err( UnitError::UnitMismatch( vec![ self.unit().clone(), unit.clone() ] ) );
 		};
 
 		let factor_old = self.unit().factor();
@@ -184,11 +184,11 @@ impl Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let x = Qty::new( 3.5.into(), Unit::Ampere );
-	/// let y = Qty::new( Num::from( -3.5 ), Unit::Ampere );
+	/// let x = Qty::new( 3.5.into(), &Unit::Ampere );
+	/// let y = Qty::new( Num::from( -3.5 ), &Unit::Ampere );
 	///
-	/// let abs_difference_x = ( x.abs() - x ).abs();
-	/// let abs_difference_y = ( y.abs() - ( -y ) ).abs();
+	/// let abs_difference_x = ( x.clone().abs() - x ).abs();
+	/// let abs_difference_y = ( y.clone().abs() - ( -y ) ).abs();
 	///
 	/// assert!( abs_difference_x < 1e-10 );
 	/// assert!( abs_difference_y < 1e-10 );
@@ -206,11 +206,11 @@ impl PartialEq for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Prefix, Unit};
-	/// assert!( Qty::new( 1.1.into(), Unit::Ampere ) == Qty::new( 1.1.into(), Unit::Ampere ) );
+	/// assert_eq!( Qty::new( 1.1.into(), &Unit::Ampere ), Qty::new( 1.1.into(), &Unit::Ampere ) );
 	///
-	/// let val_a = Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Mega ), Unit::Gram );
-	/// let val_b = Qty::new( Num::new( 1000.0 ), Unit::Kilogram );
-	/// let val_c = Qty::new( Num::new( 1.0 ), Unit::Tonne );
+	/// let val_a = Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Mega ), &Unit::Gram );
+	/// let val_b = Qty::new( Num::new( 1000.0 ), &Unit::Kilogram );
+	/// let val_c = Qty::new( Num::new( 1.0 ), &Unit::Tonne );
 	/// assert!( val_a == val_b );
 	/// assert!( val_a == val_c );
 	/// assert!( val_b == val_c );
@@ -230,8 +230,8 @@ impl PartialEq<f64> for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Prefix, Unit};
-	/// assert!( Qty::new( 1.1.into(), Unit::Ampere ) == 1.1 );
-	/// assert!( Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Kilo ), Unit::Second ) == 2e3 );
+	/// assert!( Qty::new( 1.1.into(), &Unit::Ampere ) == 1.1 );
+	/// assert!( Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Kilo ), &Unit::Second ) == 2e3 );
 	/// ```
 	fn eq( &self, other: &f64 ) -> bool {
 		self.as_f64().eq( &other )
@@ -292,22 +292,22 @@ impl Add for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) + Qty::new( 0.1.into(), Unit::Ampere );
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) + Qty::new( 0.1.into(), &Unit::Ampere );
 	///
-	/// assert_eq!( calc_a, Qty::new( 1.1.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 1.1.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) + Qty::new( 4.0.into(), Unit::Tonne );
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) + Qty::new( 4.0.into(), &Unit::Tonne );
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( 4_000_000_008.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( 4_000_000_008.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn add( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() + other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -320,22 +320,22 @@ impl Add<f64> for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) + 0.1;
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) + 0.1;
 	///
-	/// assert_eq!( calc_a, Qty::new( 1.1.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 1.1.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) + 4.0;
+	/// let calc_b = Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) + 4.0;
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( 4_000_032.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( 4_000_032.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn add( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() + other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -350,22 +350,22 @@ impl Sub for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) - Qty::new( 0.1.into(), Unit::Ampere );
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) - Qty::new( 0.1.into(), &Unit::Ampere );
 	///
-	/// assert_eq!( calc_a, Qty::new( 0.9.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 0.9.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) - Qty::new( 4.0.into(), Unit::Tonne );
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) - Qty::new( 4.0.into(), &Unit::Tonne );
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( -3_999_999_992.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( -3_999_999_992.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn sub( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() - other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -378,22 +378,22 @@ impl Sub<f64> for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) - 0.1;
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) - 0.1;
 	///
-	/// assert_eq!( calc_a, Qty::new( 0.9.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 0.9.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) - 4.0;
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) - 4.0;
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( -3_999_992.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( -3_999_992.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn sub( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() - other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -419,8 +419,8 @@ impl Mul for Qty {
 	fn mul( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() * other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -433,23 +433,47 @@ impl Mul<f64> for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) * 0.1;
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) * 0.1;
 	///
-	/// assert_eq!( calc_a, Qty::new( 0.1.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 0.1.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) * 4.0;
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) * 4.0;
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn mul( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() * other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
+	}
+}
+
+impl MulAssign<f64> for Qty {
+	/// The multiplication operator `*=`. `self` will keep the prefix.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Qty, Num, Unit, Prefix};
+	/// let mut calc_a = Qty::new( 1.0.into(), &Unit::Ampere );
+	/// calc_a *= 0.1;
+	///
+	/// assert_eq!( calc_a, Qty::new( 0.1.into(), &Unit::Ampere ) );
+	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
+	///
+	/// let mut calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram );
+	/// calc_b *= 4.0;
+	///
+	/// assert_eq!( calc_b, Qty::new( Num::new( 32.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
+	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
+	/// ```
+	fn mul_assign( &mut self, rhs: f64 ) {
+		self.number *= rhs;
 	}
 }
 
@@ -461,22 +485,22 @@ impl Div for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) / Qty::new( 0.1.into(), Unit::Ampere );
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) / Qty::new( 0.1.into(), &Unit::Ampere );
 	///
-	/// assert_eq!( calc_a, Qty::new( 10.0.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 10.0.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) / Qty::new( 4.0.into(), Unit::Tonne );
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) / Qty::new( 4.0.into(), &Unit::Tonne );
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( 2e-3 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( 2e-3 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn div( self, other: Self ) -> Self::Output {
 		let val = self.as_f64() / other.as_f64();
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -489,22 +513,22 @@ impl Div<f64> for Qty {
 	/// # Example
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
-	/// let calc_a = Qty::new( 1.0.into(), Unit::Ampere ) / 0.1;
+	/// let calc_a = Qty::new( 1.0.into(), &Unit::Ampere ) / 0.1;
 	///
-	/// assert_eq!( calc_a, Qty::new( 10.0.into(), Unit::Ampere ) );
+	/// assert_eq!( calc_a, Qty::new( 10.0.into(), &Unit::Ampere ) );
 	/// assert_eq!( calc_a.number().prefix(), Prefix::Nothing );
-	/// assert_eq!( calc_a.unit(), Unit::Ampere );
+	/// assert_eq!( calc_a.unit(), &Unit::Ampere );
 	///
-	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) / 4.0;
+	/// let calc_b = Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) / 4.0;
 	///
-	/// assert_eq!( calc_b, Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Milli ), Unit::Gram ) );
+	/// assert_eq!( calc_b, Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ) );
 	/// assert_eq!( calc_b.number().prefix(), Prefix::Milli );
 	/// ```
 	fn div( self, other: f64 ) -> Self::Output {
 		let val = self.as_f64() / other;
 
-		Self::new( val.into(), self.unit.base() )
-			.to_unit( self.unit ).unwrap()
+		Self::new( val.into(), &self.unit.base() )
+			.to_unit( &self.unit ).unwrap()
 			.to_prefix( self.number.prefix() )
 	}
 }
@@ -516,7 +540,7 @@ impl Neg for Qty {
 		let val = -self.as_f64();
 		let num = Num::new( val ).to_prefix( self.number.prefix() );
 
-		Self::new( num, self.unit.base() ).to_unit( self.unit ).unwrap()
+		Self::new( num, &self.unit.base() ).to_unit( &self.unit ).unwrap()
 	}
 }
 
@@ -539,9 +563,9 @@ impl Latex for Qty {
 	/// ```
 	/// # use sinum::Latex;
 	/// # use sinum::{Qty, Unit, Num, Prefix, Options};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).to_latex( &Options::none() ), r"\qty{9.9}{\ampere}".to_string() );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_latex( &Options::none() ), r"\qty{9.9}{\ampere}".to_string() );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Ampere ).to_latex( &Options::none() ),
+	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Ampere ).to_latex( &Options::none() ),
 	/// 	r"\qty{9.9}{\milli\ampere}".to_string()
 	/// );
 	/// ```
@@ -552,28 +576,28 @@ impl Latex for Qty {
 	/// ```
 	/// # use sinum::Latex;
 	/// # use sinum::{Qty, Unit, Num, Prefix, Options};
-	/// assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
+	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_latex( &Options::new() ),
+	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Kilogram ).to_latex( &Options::new() ),
 	/// 	r"\qty{9.9}{\mega\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_latex(
+	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kilogram ).to_latex(
 	/// 		&Options::new()
 	/// 			.minimum_decimal_digits( 1 )
 	/// 	),
 	/// 	r"\qty{9.9}{\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_latex( &Options::new() ),
+	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_latex( &Options::new() ),
 	/// 	r"\qty{9.9}{\milli\gram}".to_string()
 	/// );
 	/// assert_eq!( Qty::new(
-	/// 	Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_latex( &Options::new() ),
+	/// 	Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_latex( &Options::new() ),
 	/// 	r"\qty{9.9}{\milli\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_latex( &Options::new() ),
+	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_latex( &Options::new() ),
 	/// 	r"\qty{9.9}{\kilogram}".to_string()
 	/// );
 	/// ```
@@ -606,40 +630,45 @@ mod tests {
 	use crate::Prefix;
 
 	#[test]
+	fn qty_eq() {
+		assert!( Qty::new( 10e3.into(), &Unit::Kilogram ) == Qty::new( 10.0.into(), &Unit::Tonne ) );
+	}
+
+	#[test]
 	fn siqty_as_f64() {
 		// `as_f64()` returns the value with regard to the base unit.
-		assert_eq!( Qty::new( 9.9.into(), Unit::Tonne ).as_f64(), 9.9e3 );
-		assert_eq!( Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), Unit::Gram ).as_f64(), 8.0e-6 );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Tonne ).as_f64(), 9.9e3 );
+		assert_eq!( Qty::new( Num::new( 8.0 ).with_prefix( Prefix::Milli ), &Unit::Gram ).as_f64(), 8.0e-6 );
 	}
 
 	#[test]
 	fn siqty_string() {
-		assert_eq!( Qty::new( 9.9.into(), Unit::Ampere ).to_string(), "9.9 A".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Meter ).to_string(), "9.9 km".to_string() );
-		assert_eq!( Qty::new( 9.9.into(), Unit::Kelvin ).to_string(), "9.9 K".to_string() );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_string(), "9.9 A".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Meter ).to_string(), "9.9 km".to_string() );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Kelvin ).to_string(), "9.9 K".to_string() );
 	}
 
 	// The weight/mass is a special case.
 	#[test]
 	fn siqty_kilogram() {
-		assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).as_f64(), 9.9 );
-		assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).number(), Num::new( 9.9 ) );
-		assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_string(), "9.9 kg".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_string(), "9.9 Mg".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_string(), "9.9 g".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_string(), "9.9 mg".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_string(), "9.9 mg".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_string(), "9.9 kg".to_string() );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).as_f64(), 9.9 );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).number(), Num::new( 9.9 ) );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_string(), "9.9 kg".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Kilogram ).to_string(), "9.9 Mg".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kilogram ).to_string(), "9.9 g".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_string(), "9.9 mg".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_string(), "9.9 mg".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_string(), "9.9 kg".to_string() );
 	}
 
 	#[cfg( feature = "tex" )]
 	#[test]
 	fn siqty_latex_kilogram() {
-		assert_eq!( Qty::new( 9.9.into(), Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\mega\gram}".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\gram}".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
-		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\mega\gram}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\gram}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
 	}
 }
