@@ -49,6 +49,7 @@ pub use crate::number::Num;
 
 mod unit;
 use crate::unit::PhysicalQuantity;
+pub use crate::unit::UnitError;
 pub use crate::unit::Unit;
 
 mod quantity;
