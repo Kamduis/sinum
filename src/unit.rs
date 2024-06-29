@@ -7,8 +7,8 @@
 // Crates
 
 
-// use std::collections::BTreeSet;
 use std::fmt;
+use std::str::FromStr;
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
@@ -29,7 +29,10 @@ use crate::Options;
 #[derive( Error, Debug )]
 pub enum UnitError {
 	#[error( "Not all units represent the same physical quantity: {}", .0.iter().map( |x| x.to_string() ).collect::<Vec<String>>().join( ", " ) )]
-	UnitMismatch( Vec<Unit> )
+	UnitMismatch( Vec<Unit> ),
+
+	#[error( "Not a valid unit: {0}" )]
+	ParseFailure( String ),
 }
 
 
@@ -186,6 +189,33 @@ impl Unit {
 			Self::Bar =>       Self::Pascal,
 			Self::Sievert =>   Self::Sievert,
 		}
+	}
+}
+
+impl FromStr for Unit {
+	type Err = UnitError;
+
+	fn from_str( s: &str ) -> Result<Self, Self::Err> {
+		let result = match s.to_lowercase().as_str() {
+			"ampere" | "a" => Self::Ampere,
+			"candela" | "cd" => Self::Candela,
+			"kelvin" | "k" => Self::Kelvin,
+			"kilogram" | "kg" => Self::Kilogram,
+			"meter" | "m" => Self::Meter,
+			"mole" | "mol" => Self::Mole,
+			"second" | "s" => Self::Second,
+			"gram" | "g" => Self::Gram,
+			"tonne" | "t" => Self::Tonne,
+			"astronomical unit" | "au" => Self::AstronomicalUnit,
+			"lightyear" | "ly" => Self::Lightyear,
+			"parsec" | "pc" => Self::Parsec,
+			"pascal" | "pa" => Self::Pascal,
+			"bar" => Self::Bar,
+			"sievert" | "sv" => Self::Sievert,
+			_ => return Err( UnitError::ParseFailure( s.to_string() ) ),
+		};
+
+		Ok( result )
 	}
 }
 
