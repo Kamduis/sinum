@@ -197,6 +197,49 @@ impl Qty {
 		let val = self.as_f64().abs();
 		Self::new( Num::new( val ).to_prefix( self.number.prefix() ), self.unit() )
 	}
+
+	/// Returns a string representation of the quantity with engineering notation.
+	/// Engineering notation is similar to scientific notation (using exponents of ten) but the exponents are always a multiple of 3.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Qty, Num, Unit, Prefix};
+	/// let x = Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Milli ), &Unit::Ampere );
+	///
+	/// assert_eq!( x.to_string_eng(), "2×10^-3 A" );
+	/// ```
+	pub fn to_string_eng( &self ) -> String {
+		format!( "{} {}", self.number.to_string_eng(), self.unit )
+	}
+
+	/// Returns a LaTeX string representation of the quantity with engineering notation.
+	/// Engineering notation is similar to scientific notation (using exponents of ten) but the exponents are always a multiple of 3.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Qty, Num, Unit, Prefix, Options};
+	/// let x = Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Milli ), &Unit::Ampere );
+	///
+	/// assert_eq!( x.to_latex_eng( &Options::new() ), r"\qty{2e-3}{\ampere}" );
+	/// ```
+	#[cfg( feature = "tex" )]
+	pub fn to_latex_eng( &self, options: &Options ) -> String {
+		if let Prefix::Nothing = self.number.prefix() {
+			return self.to_latex( options );
+		}
+
+		let mantissa = match options.minimum_decimal_digits {
+			Some( x ) => format!( "{:.1$}", self.number.mantissa(), x as usize ),
+			None => self.number.mantissa().to_string(),
+		};
+		format!(
+			r"\qty{}{{{}e{}}}{{{}}}",
+			options,
+			mantissa,
+			self.number.prefix().exp(),
+			self.unit.to_latex( options )
+		)
+	}
 }
 
 impl PartialEq for Qty {
@@ -670,5 +713,20 @@ mod tests {
 		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
 		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\milli\gram}".to_string() );
 		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_latex( &Options::new() ), r"\qty{9.9}{\kilogram}".to_string() );
+	}
+
+	#[test]
+	fn qty_string_engineering() {
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_string_eng(), "9.9 A".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Meter ).to_string_eng(), "9.9×10^3 m".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kelvin ).to_string_eng(), "9.9×10^-3 K".to_string() );
+	}
+
+	#[cfg( feature = "tex" )]
+	#[test]
+	fn qty_latex_engineering() {
+		assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_latex_eng( &Options::new() ), r"\qty{9.9}{\ampere}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Meter ).to_latex_eng( &Options::new() ), r"\qty{9.9e3}{\meter}".to_string() );
+		assert_eq!( Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kelvin ).to_latex_eng( &Options::new() ), r"\qty{9.9e-3}{\kelvin}".to_string() );
 	}
 }
