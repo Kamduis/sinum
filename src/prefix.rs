@@ -8,6 +8,7 @@
 
 
 use std::fmt;
+use std::str::FromStr;
 
 use thiserror::Error;
 
@@ -30,6 +31,9 @@ use crate::Options;
 pub enum PrefixError {
 	#[error( "There is no Prefix with exponent `{0}`" )]
 	TryFromExp( i8 ),
+
+	#[error( "Cannot convert to Prefix from: `{0}`" )]
+	TryFromStr( String ),
 
 	#[error( "There is no SI prefix for `{0}`" )]
 	ExpInvalid( i32 ),
@@ -188,6 +192,39 @@ impl TryFrom<i8> for Prefix {
 		};
 
 		Ok( res )
+	}
+}
+
+impl FromStr for Prefix {
+	type Err = PrefixError;
+
+	fn from_str( s: &str ) -> Result<Self, Self::Err> {
+		let result = match s.to_lowercase().as_str() {
+			"yocto"   => Self::Yocto,
+			"zepto"   => Self::Zepto,
+			"atto"    => Self::Atto,
+			"femto"   => Self::Femto,
+			"pico"    => Self::Pico,
+			"nano"    => Self::Nano,
+			"micro"   => Self::Micro,
+			"milli"   => Self::Milli,
+			"centi"   => Self::Centi,
+			"deci"    => Self::Deci,
+			"nothing" => Self::Nothing,
+			"deca"    => Self::Deca,
+			"hecto"   => Self::Hecto,
+			"kilo"    => Self::Kilo,
+			"mega"    => Self::Mega,
+			"giga"    => Self::Giga,
+			"tera"    => Self::Tera,
+			"peta"    => Self::Peta,
+			"exa"     => Self::Exa,
+			"zetta"   => Self::Zetta,
+			"yotta"   => Self::Yotta,
+			_ => return Err( PrefixError::TryFromStr( s.to_string() ) ),
+		};
+
+		Ok( result )
 	}
 }
 
