@@ -62,4 +62,4 @@ mod latex;
 pub use crate::latex::Latex;
 
 #[cfg( feature = "tex" )]
-pub use crate::latex::Options;
+pub use crate::latex::TexOptions;

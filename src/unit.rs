@@ -17,7 +17,7 @@ use thiserror::Error;
 #[cfg( feature = "tex" )]
 use crate::Latex;
 #[cfg( feature = "tex" )]
-use crate::Options;
+use crate::TexOptions;
 
 
 
@@ -255,11 +255,11 @@ impl Latex for Unit {
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::{Unit, Options};
-	/// assert_eq!( Unit::Meter.to_latex( &Options::none() ), r"\meter".to_string() );
-	/// assert_eq!( Unit::Second.to_latex( &Options::new() ), r"\second".to_string() );
+	/// # use sinum::{Unit, TexOptions};
+	/// assert_eq!( Unit::Meter.to_latex( &TexOptions::none() ), r"\meter".to_string() );
+	/// assert_eq!( Unit::Second.to_latex( &TexOptions::new() ), r"\second".to_string() );
 	/// ```
-	fn to_latex( &self, _options: &Options ) -> String {
+	fn to_latex( &self, _options: &TexOptions ) -> String {
 		match self {
 			Self::Custom( x ) => x.clone(),
 			// Base units

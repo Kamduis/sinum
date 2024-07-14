@@ -18,7 +18,7 @@ use serde::{Serialize, Deserialize};
 #[cfg( feature = "tex" )]
 use crate::Latex;
 #[cfg( feature = "tex" )]
-use crate::Options;
+use crate::TexOptions;
 
 
 
@@ -265,12 +265,12 @@ impl Latex for Prefix {
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::{Prefix, Options};
-	/// assert_eq!( Prefix::Femto.to_latex( &Options::none() ), r"\femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex( &Options::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex( &Options::none() ), r"\giga".to_string() );
+	/// # use sinum::{Prefix, TexOptions};
+	/// assert_eq!( Prefix::Femto.to_latex( &TexOptions::none() ), r"\femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex( &TexOptions::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex( &TexOptions::none() ), r"\giga".to_string() );
 	/// ```
-	fn to_latex( &self, _options: &Options ) -> String {
+	fn to_latex( &self, _options: &TexOptions ) -> String {
 		match self {
 			Self::Yocto =>   format!( r"\yocto" ),
 			Self::Zepto =>   format!( r"\zepto" ),
