@@ -592,7 +592,7 @@ impl fmt::Display for Num {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		match self.prefix {
 			Prefix::Nothing => write!( f, "{}", self.mantissa ),
-			_ => write!( f, "{} {}", self.mantissa, self.prefix )
+			_ => write!( f, "{} {}", self.mantissa, self.prefix.to_string_sym() )
 		}
 	}
 }

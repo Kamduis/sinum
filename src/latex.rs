@@ -23,6 +23,9 @@ use std::fmt;
 pub trait Latex {
 	/// Converts the entity into a LaTeX-string.
 	fn to_latex( &self, options: &TexOptions ) -> String;
+
+	/// Converts the entity into a LaTeX-string displaying symbols instead of written units.
+	fn to_latex_sym( &self, options: &TexOptions ) -> String;
 }
 
 
