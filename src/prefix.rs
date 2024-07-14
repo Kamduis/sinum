@@ -16,7 +16,7 @@ use thiserror::Error;
 use serde::{Serialize, Deserialize};
 
 #[cfg( feature = "tex" )]
-use crate::Latex;
+use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
 use crate::TexOptions;
 
@@ -302,12 +302,15 @@ impl Latex for Prefix {
 	fn to_latex( &self, _options: &TexOptions ) -> String {
 		self.to_string()
 	}
+}
 
+#[cfg( feature = "tex" )]
+impl LatexSym for Prefix {
 	/// Return a string that represents this `Prefix` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
 	///
 	/// # Example
 	/// ```
-	/// # use sinum::Latex;
+	/// # use sinum::LatexSym;
 	/// # use sinum::{Prefix, TexOptions};
 	/// assert_eq!( Prefix::Femto.to_latex_sym( &TexOptions::none() ), r"\femto".to_string() );
 	/// assert_eq!( Prefix::Nothing.to_latex_sym( &TexOptions::none() ), "".to_string() );

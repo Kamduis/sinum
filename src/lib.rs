@@ -59,7 +59,7 @@ pub use crate::quantity::Qty;
 mod latex;
 
 #[cfg( feature = "tex" )]
-pub use crate::latex::Latex;
+pub use crate::latex::{Latex, LatexSym};
 
 #[cfg( feature = "tex" )]
 pub use crate::latex::TexOptions;

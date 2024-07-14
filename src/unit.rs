@@ -15,7 +15,7 @@ use serde::{Serialize, Deserialize};
 use thiserror::Error;
 
 #[cfg( feature = "tex" )]
-use crate::Latex;
+use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
 use crate::TexOptions;
 
@@ -295,12 +295,15 @@ impl Latex for Unit {
 	fn to_latex( &self, _options: &TexOptions ) -> String {
 		self.to_string()
 	}
+}
 
+#[cfg( feature = "tex" )]
+impl LatexSym for Unit {
 	/// Return a string that represents this `Unit` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
 	///
 	/// # Example
 	/// ```
-	/// # use sinum::Latex;
+	/// # use sinum::LatexSym;
 	/// # use sinum::{Unit, TexOptions};
 	/// assert_eq!( Unit::Meter.to_latex_sym( &TexOptions::none() ), r"\meter".to_string() );
 	/// assert_eq!( Unit::Second.to_latex_sym( &TexOptions::new() ), r"\second".to_string() );

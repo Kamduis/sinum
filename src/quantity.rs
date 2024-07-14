@@ -15,7 +15,7 @@ use std::ops::{Add, Sub, Mul, MulAssign, Div, Neg};
 use serde::{Serialize, Deserialize};
 
 #[cfg( feature = "tex" )]
-use crate::Latex;
+use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
 use crate::TexOptions;
 
@@ -602,12 +602,15 @@ impl Latex for Qty {
 	fn to_latex( &self, options: &TexOptions ) -> String {
 		self.to_latex_sym( options )
 	}
+}
 
+#[cfg( feature = "tex" )]
+impl LatexSym for Qty {
 	/// Return a string that represents this `Qty` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
 	///
 	/// # Example
 	/// ```
-	/// # use sinum::Latex;
+	/// # use sinum::LatexSym;
 	/// # use sinum::{Qty, Unit, Num, Prefix, TexOptions};
 	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_latex_sym( &TexOptions::none() ), r"\qty{9.9}{\ampere}".to_string() );
 	/// assert_eq!(
@@ -620,7 +623,7 @@ impl Latex for Qty {
 	///
 	/// The base unit for mass, the kilogram is a special case, since it already has a prefix (kilo), that has to be taken into account.
 	/// ```
-	/// # use sinum::Latex;
+	/// # use sinum::LatexSym;
 	/// # use sinum::{Qty, Unit, Num, Prefix, TexOptions};
 	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ), r"\qty{9.9}{\kilogram}".to_string() );
 	/// assert_eq!(
