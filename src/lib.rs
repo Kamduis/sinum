@@ -1,37 +1,11 @@
-//! This crate provides the `Num` type that represents numbers that can easily be represented by the International System of Units (SI, from French Système International).
+// File links are not supported by rustdoc.
+//! [LICENSE-APACHE]: https://github.com/Kamduis/sinum/blob/master/LICENSE-APACHE
+//! [LICENSE-MIT]: https://github.com/Kamduis/sinum/blob/master/LICENSE-MIT
 //!
-//! It is easy to crate a `Num` and have it represent a number:
-//! ```
-//! # use sinum::Num;
-//! let num = Num::new( 9.9 );
-//! assert_eq!( num.as_f64(), 9.9 );
-//! assert_eq!( format!( "{}", num ), "9.9" );
-//! ```
-//!
-//! Assigning the the prefix is also straightforward:
-//! ```
-//! # use sinum::{Num,Prefix};
-//! let num_milli = Num::new( 9.9 ).with_prefix( Prefix::Milli );
-//!
-//! assert_eq!( num_milli.as_f64(), 0.0099 );
-//! assert_eq!( num_milli.prefix(), Prefix::Milli );
-//! assert_eq!( format!( "{}", num_milli ), "9.9 m" );
-//! ```
-//!
-//! A `Num` prefix can be changed, without changing the value of the number it represents:
-//! ```
-//! # use sinum::{Num,Prefix};
-//! let num = Num::new( 9.9 ).to_prefix( Prefix::Milli );
-//!
-//! assert_eq!( num.as_f64(), 9.9 );
-//! assert_eq!( num.prefix(), Prefix::Milli );
-//! assert_eq!( format!( "{}", num ), "9900 m" );
-//! ```
-//!
-//! # Optional Features
-//! * **serde** Enables `serde` support.
-//! * **tex** Enables returning `Prefix`es and `Num`s as strings usable directly by LaTeX (requires the `{siunitx}` LaTeX-package).
-
+//! <style>
+//! .rustdoc-hidden { display: none; }
+//! </style>
+#![doc = include_str!( "../README.md" )]
 
 
 
