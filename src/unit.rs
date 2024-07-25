@@ -7,17 +7,17 @@
 // Crates
 
 
-// use std::collections::BTreeSet;
 use std::fmt;
+use std::str::FromStr;
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
 use thiserror::Error;
 
 #[cfg( feature = "tex" )]
-use crate::Latex;
+use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
-use crate::Options;
+use crate::TexOptions;
 
 
 
@@ -29,7 +29,10 @@ use crate::Options;
 #[derive( Error, Debug )]
 pub enum UnitError {
 	#[error( "Not all units represent the same physical quantity: {}", .0.iter().map( |x| x.to_string() ).collect::<Vec<String>>().join( ", " ) )]
-	UnitMismatch( Vec<Unit> )
+	UnitMismatch( Vec<Unit> ),
+
+	#[error( "Not a valid unit: {0}" )]
+	ParseFailure( String ),
 }
 
 
@@ -187,6 +190,68 @@ impl Unit {
 			Self::Sievert =>   Self::Sievert,
 		}
 	}
+
+	/// Returns the symbol representing `self` as unit.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::Unit;
+	/// assert_eq!( Unit::Meter.to_string_sym(), "m".to_string() );
+	/// assert_eq!( Unit::Second.to_string_sym(), "s".to_string() );
+	/// ```
+	pub fn to_string_sym( &self ) -> String {
+		let res = match self {
+			Self::Custom( x ) => x,
+			// Base units
+			Self::Ampere =>    "A",
+			Self::Candela =>   "cd",
+			Self::Kelvin =>    "K",
+			Self::Kilogram =>  "kg",
+			Self::Meter =>     "m",
+			Self::Mole =>      "mol",
+			Self::Second =>    "s",
+			// Additional mass units
+			Self::Gram =>      "g",
+			Self::Tonne =>     "t",
+			// Additional length units
+			Self::AstronomicalUnit => "AU",
+			Self::Lightyear => "ly",
+			Self::Parsec =>    "pc",
+			//
+			Self::Pascal =>    "Pa",
+			Self::Bar =>       "bar",
+			Self::Sievert =>   "Sv",
+		};
+
+		res.to_string()
+	}
+}
+
+impl FromStr for Unit {
+	type Err = UnitError;
+
+	fn from_str( s: &str ) -> Result<Self, Self::Err> {
+		let result = match s.to_lowercase().as_str() {
+			"ampere" | "a" => Self::Ampere,
+			"candela" | "cd" => Self::Candela,
+			"kelvin" | "k" => Self::Kelvin,
+			"kilogram" | "kg" => Self::Kilogram,
+			"meter" | "m" => Self::Meter,
+			"mole" | "mol" => Self::Mole,
+			"second" | "s" => Self::Second,
+			"gram" | "g" => Self::Gram,
+			"tonne" | "t" => Self::Tonne,
+			"astronomical unit" | "au" => Self::AstronomicalUnit,
+			"lightyear" | "ly" => Self::Lightyear,
+			"parsec" | "pc" => Self::Parsec,
+			"pascal" | "pa" => Self::Pascal,
+			"bar" => Self::Bar,
+			"sievert" | "sv" => Self::Sievert,
+			_ => return Err( UnitError::ParseFailure( s.to_string() ) ),
+		};
+
+		Ok( result )
+	}
 }
 
 impl fmt::Display for Unit {
@@ -194,42 +259,56 @@ impl fmt::Display for Unit {
 		match self {
 			Self::Custom( x ) => write!( f, "{}", x ),
 			// Base units
-			Self::Ampere =>    write!( f, "A" ),
-			Self::Candela =>   write!( f, "cd" ),
-			Self::Kelvin =>    write!( f, "K" ),
-			Self::Kilogram =>  write!( f, "kg" ),
-			Self::Meter =>     write!( f, "m" ),
+			Self::Ampere =>    write!( f, "ampere" ),
+			Self::Candela =>   write!( f, "candela" ),
+			Self::Kelvin =>    write!( f, "kelvin" ),
+			Self::Kilogram =>  write!( f, "kilogram" ),
+			Self::Meter =>     write!( f, "meter" ),
 			Self::Mole =>      write!( f, "mol" ),
-			Self::Second =>    write!( f, "s" ),
+			Self::Second =>    write!( f, "second" ),
 			// Additional mass units
-			Self::Gram =>      write!( f, "g" ),
-			Self::Tonne =>     write!( f, "t" ),
+			Self::Gram =>      write!( f, "gram" ),
+			Self::Tonne =>     write!( f, "tonne" ),
 			// Additional length units
-			Self::AstronomicalUnit => write!( f, "AU" ),
-			Self::Lightyear => write!( f, "ly" ),
-			Self::Parsec =>    write!( f, "pc" ),
+			Self::AstronomicalUnit => write!( f, "astronomical unit" ),
+			Self::Lightyear => write!( f, "lightyear" ),
+			Self::Parsec =>    write!( f, "parsec" ),
 			//
-			Self::Pascal =>    write!( f, "Pa" ),
+			Self::Pascal =>    write!( f, "pascal" ),
 			Self::Bar =>       write!( f, "bar" ),
-			Self::Sievert =>   write!( f, "Sv" ),
+			Self::Sievert =>   write!( f, "sievert" ),
 		}
 	}
 }
 
 #[cfg( feature = "tex" )]
 impl Latex for Unit {
-	/// Return a string that represents this `Prefix` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
-	///
-	/// **Note** Requires the **`tex`** feature.
+	/// Return the name of the unit as string. This is identical to `.to_string()`.
 	///
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::{Unit, Options};
-	/// assert_eq!( Unit::Meter.to_latex( &Options::none() ), r"\meter".to_string() );
-	/// assert_eq!( Unit::Second.to_latex( &Options::new() ), r"\second".to_string() );
+	/// # use sinum::{Unit, TexOptions};
+	/// assert_eq!( Unit::Meter.to_latex( &TexOptions::none() ), "meter".to_string() );
+	/// assert_eq!( Unit::Second.to_latex( &TexOptions::new() ), "second".to_string() );
 	/// ```
-	fn to_latex( &self, _options: &Options ) -> String {
+	fn to_latex( &self, _options: &TexOptions ) -> String {
+		self.to_string()
+	}
+}
+
+#[cfg( feature = "tex" )]
+impl LatexSym for Unit {
+	/// Return a string that represents this `Unit` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::LatexSym;
+	/// # use sinum::{Unit, TexOptions};
+	/// assert_eq!( Unit::Meter.to_latex_sym( &TexOptions::none() ), r"\meter".to_string() );
+	/// assert_eq!( Unit::Second.to_latex_sym( &TexOptions::new() ), r"\second".to_string() );
+	/// ```
+	fn to_latex_sym( &self, _options: &TexOptions ) -> String {
 		match self {
 			Self::Custom( x ) => x.clone(),
 			// Base units
@@ -282,7 +361,9 @@ mod tests {
 
 	#[test]
 	fn print_prefix() {
-		assert_eq!( Unit::Ampere.to_string(), "A".to_string() );
-		assert_eq!( Unit::Candela.to_string(), "cd".to_string() );
+		assert_eq!( Unit::Ampere.to_string(), "ampere".to_string() );
+		assert_eq!( Unit::Ampere.to_string_sym(), "A".to_string() );
+		assert_eq!( Unit::Candela.to_string(), "candela".to_string() );
+		assert_eq!( Unit::Candela.to_string_sym(), "cd".to_string() );
 	}
 }

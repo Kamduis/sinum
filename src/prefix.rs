@@ -8,6 +8,7 @@
 
 
 use std::fmt;
+use std::str::FromStr;
 
 use thiserror::Error;
 
@@ -15,9 +16,9 @@ use thiserror::Error;
 use serde::{Serialize, Deserialize};
 
 #[cfg( feature = "tex" )]
-use crate::Latex;
+use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
-use crate::Options;
+use crate::TexOptions;
 
 
 
@@ -30,6 +31,9 @@ use crate::Options;
 pub enum PrefixError {
 	#[error( "There is no Prefix with exponent `{0}`" )]
 	TryFromExp( i8 ),
+
+	#[error( "Cannot convert to Prefix from: `{0}`" )]
+	TryFromStr( String ),
 
 	#[error( "There is no SI prefix for `{0}`" )]
 	ExpInvalid( i32 ),
@@ -143,6 +147,35 @@ impl Prefix {
 			Self::Yotta =>   24,
 		}
 	}
+
+	/// Returns `self` as symbol string. While `to_string()` returns the name of the unit prefix, this returns the prexif letter as it is written in front of the unit symbol.
+	pub fn to_string_sym( &self ) -> String {
+		let res = match self {
+			Self::Yocto =>   "y",
+			Self::Zepto =>   "z",
+			Self::Atto =>    "a",
+			Self::Femto =>   "f",
+			Self::Pico =>    "p",
+			Self::Nano =>    "n",
+			Self::Micro =>   "µ",
+			Self::Milli =>   "m",
+			Self::Centi =>   "c",
+			Self::Deci =>    "d",
+			Self::Nothing => "",
+			Self::Deca =>    "da",
+			Self::Hecto =>   "h",
+			Self::Kilo =>    "k",
+			Self::Mega =>    "M",
+			Self::Giga =>    "G",
+			Self::Tera =>    "T",
+			Self::Peta =>    "P",
+			Self::Exa =>     "E",
+			Self::Zetta =>   "Z",
+			Self::Yotta =>   "Y",
+		};
+
+		res.to_string()
+	}
 }
 
 impl TryFrom<i8> for Prefix {
@@ -191,49 +224,99 @@ impl TryFrom<i8> for Prefix {
 	}
 }
 
+impl FromStr for Prefix {
+	type Err = PrefixError;
+
+	fn from_str( s: &str ) -> Result<Self, Self::Err> {
+		let result = match s.to_lowercase().as_str() {
+			"yocto"   => Self::Yocto,
+			"zepto"   => Self::Zepto,
+			"atto"    => Self::Atto,
+			"femto"   => Self::Femto,
+			"pico"    => Self::Pico,
+			"nano"    => Self::Nano,
+			"micro"   => Self::Micro,
+			"milli"   => Self::Milli,
+			"centi"   => Self::Centi,
+			"deci"    => Self::Deci,
+			"nothing" => Self::Nothing,
+			"deca"    => Self::Deca,
+			"hecto"   => Self::Hecto,
+			"kilo"    => Self::Kilo,
+			"mega"    => Self::Mega,
+			"giga"    => Self::Giga,
+			"tera"    => Self::Tera,
+			"peta"    => Self::Peta,
+			"exa"     => Self::Exa,
+			"zetta"   => Self::Zetta,
+			"yotta"   => Self::Yotta,
+			_ => return Err( PrefixError::TryFromStr( s.to_string() ) ),
+		};
+
+		Ok( result )
+	}
+}
+
 impl fmt::Display for Prefix {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
-		match self {
-			Self::Yocto =>   write!( f, "y" ),
-			Self::Zepto =>   write!( f, "z" ),
-			Self::Atto =>    write!( f, "a" ),
-			Self::Femto =>   write!( f, "f" ),
-			Self::Pico =>    write!( f, "p" ),
-			Self::Nano =>    write!( f, "n" ),
-			Self::Micro =>   write!( f, "µ" ),
-			Self::Milli =>   write!( f, "m" ),
-			Self::Centi =>   write!( f, "c" ),
-			Self::Deci =>    write!( f, "d" ),
-			Self::Nothing => write!( f, "" ),
-			Self::Deca =>    write!( f, "da" ),
-			Self::Hecto =>   write!( f, "h" ),
-			Self::Kilo =>    write!( f, "k" ),
-			Self::Mega =>    write!( f, "M" ),
-			Self::Giga =>    write!( f, "G" ),
-			Self::Tera =>    write!( f, "T" ),
-			Self::Peta =>    write!( f, "P" ),
-			Self::Exa =>     write!( f, "E" ),
-			Self::Zetta =>   write!( f, "Z" ),
-			Self::Yotta =>   write!( f, "Y" ),
-		}
+		let res = match self {
+			Self::Yocto =>   "yocto",
+			Self::Zepto =>   "zepto",
+			Self::Atto =>    "atto",
+			Self::Femto =>   "femto",
+			Self::Pico =>    "pico",
+			Self::Nano =>    "nano",
+			Self::Micro =>   "micro",
+			Self::Milli =>   "milli",
+			Self::Centi =>   "centi",
+			Self::Deci =>    "deci",
+			Self::Nothing => "",
+			Self::Deca =>    "deca",
+			Self::Hecto =>   "hecto",
+			Self::Kilo =>    "kilo",
+			Self::Mega =>    "mega",
+			Self::Giga =>    "giga",
+			Self::Tera =>    "tera",
+			Self::Peta =>    "peta",
+			Self::Exa =>     "exa",
+			Self::Zetta =>   "zetta",
+			Self::Yotta =>   "yotta",
+		};
+
+		write!( f, "{}", res )
 	}
 }
 
 #[cfg( feature = "tex" )]
 impl Latex for Prefix {
-	/// Return a string that represents this `Prefix` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
-	///
-	/// **Note** Requires the **`tex`** feature.
+	/// Return a string that represents this `Prefix` as LaTeX text. This is identical to `.to_string()`.
 	///
 	/// # Example
 	/// ```
 	/// # use sinum::Latex;
-	/// # use sinum::{Prefix, Options};
-	/// assert_eq!( Prefix::Femto.to_latex( &Options::none() ), r"\femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex( &Options::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex( &Options::none() ), r"\giga".to_string() );
+	/// # use sinum::{Prefix, TexOptions};
+	/// assert_eq!( Prefix::Femto.to_latex( &TexOptions::none() ), "femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex( &TexOptions::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex( &TexOptions::none() ), "giga".to_string() );
 	/// ```
-	fn to_latex( &self, _options: &Options ) -> String {
+	fn to_latex( &self, _options: &TexOptions ) -> String {
+		self.to_string()
+	}
+}
+
+#[cfg( feature = "tex" )]
+impl LatexSym for Prefix {
+	/// Return a string that represents this `Prefix` as LaTeX command (requiring the usage of the `{siunitx}` package in LaTeX).
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::LatexSym;
+	/// # use sinum::{Prefix, TexOptions};
+	/// assert_eq!( Prefix::Femto.to_latex_sym( &TexOptions::none() ), r"\femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex_sym( &TexOptions::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex_sym( &TexOptions::none() ), r"\giga".to_string() );
+	/// ```
+	fn to_latex_sym( &self, _options: &TexOptions ) -> String {
 		match self {
 			Self::Yocto =>   format!( r"\yocto" ),
 			Self::Zepto =>   format!( r"\zepto" ),
@@ -273,7 +356,9 @@ mod tests {
 
 	#[test]
 	fn print_prefix() {
-		assert_eq!( Prefix::Peta.to_string(), "P".to_string() );
-		assert_eq!( Prefix::Femto.to_string(), "f".to_string() );
+		assert_eq!( Prefix::Peta.to_string(), "peta".to_string() );
+		assert_eq!( Prefix::Peta.to_string_sym(), "P".to_string() );
+		assert_eq!( Prefix::Femto.to_string(), "femto".to_string() );
+		assert_eq!( Prefix::Femto.to_string_sym(), "f".to_string() );
 	}
 }

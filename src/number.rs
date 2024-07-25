@@ -234,6 +234,23 @@ impl Num {
 		let val = self.as_f64().powf( n );
 		Self::new( val ).to_prefix( self.prefix() )
 	}
+
+	/// Returns a string representation of the number with engineering notation.
+	/// Engineering notation is similar to scientific notation (using exponents of ten) but the exponents are always a multiple of 3.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::{Num, Prefix};
+	/// let x = Num::new( 2.0 ).with_prefix( Prefix::Milli );
+	///
+	/// assert_eq!( x.to_string_eng(), "2×10^-3" );
+	/// ```
+	pub fn to_string_eng( &self ) -> String {
+		match self.prefix {
+			Prefix::Nothing => self.mantissa.to_string(),
+			_ => format!( "{}×10^{}", self.mantissa, self.prefix.exp() )
+		}
+	}
 }
 
 impl PartialEq for Num {
@@ -575,7 +592,7 @@ impl fmt::Display for Num {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		match self.prefix {
 			Prefix::Nothing => write!( f, "{}", self.mantissa ),
-			_ => write!( f, "{} {}", self.mantissa, self.prefix )
+			_ => write!( f, "{} {}", self.mantissa, self.prefix.to_string_sym() )
 		}
 	}
 }
@@ -597,5 +614,13 @@ mod tests {
 		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Mega ).to_string(), "9999.9 M".to_string() );
 		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Milli ).to_string(), "9999.9 m".to_string() );
 		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Mega ).to_prefix( Prefix::Milli ).to_string(), "9999900000000 m".to_string() );
+	}
+
+	#[test]
+	fn sinum_string_engineering() {
+		assert_eq!( Num::new( 9999.9 ).to_string_eng(), "9999.9".to_string() );
+		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Mega ).to_string_eng(), "9999.9×10^6".to_string() );
+		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Milli ).to_string_eng(), "9999.9×10^-3".to_string() );
+		assert_eq!( Num::new( 9999.9 ).with_prefix( Prefix::Mega ).to_prefix( Prefix::Milli ).to_string_eng(), "9999900000000×10^-3".to_string() );
 	}
 }
