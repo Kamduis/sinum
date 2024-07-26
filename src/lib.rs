@@ -1,3 +1,8 @@
+// Replace crate links with internal links when creating documentation with `cargo`.
+//! [`Num`]: crate::Num
+//! [`Prefix`]: crate::Prefix
+//! [`Qty`]: crate::Qty
+//! [`serde`]: serde
 // File links are not supported by rustdoc.
 //! [LICENSE-APACHE]: https://github.com/Kamduis/sinum/blob/master/LICENSE-APACHE
 //! [LICENSE-MIT]: https://github.com/Kamduis/sinum/blob/master/LICENSE-MIT
