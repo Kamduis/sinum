@@ -590,9 +590,12 @@ impl From<f64> for Num {
 
 impl fmt::Display for Num {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
+		// Avoiding print output like "0.100000000012".
+		let mantissa_rounded = ( self.mantissa * 1e6 ).round() / 1e6;
+
 		match self.prefix {
-			Prefix::Nothing => write!( f, "{}", self.mantissa ),
-			_ => write!( f, "{} {}", self.mantissa, self.prefix.to_string_sym() )
+			Prefix::Nothing => write!( f, "{}", mantissa_rounded ),
+			_ => write!( f, "{} {}", mantissa_rounded, self.prefix.to_string_sym() )
 		}
 	}
 }
