@@ -290,6 +290,7 @@ impl fmt::Display for Prefix {
 	}
 }
 
+#[cfg( feature = "i18n" )]
 impl DisplayLocale for Prefix {
 	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
 		match self {

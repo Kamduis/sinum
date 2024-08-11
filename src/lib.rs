@@ -19,7 +19,7 @@
 // Modules
 
 
-use std::fmt;
+#[cfg( feature = "i18n" )] use std::fmt;
 
 #[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
 
