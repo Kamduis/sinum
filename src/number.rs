@@ -103,29 +103,29 @@ impl Num {
 	/// Creates a new `Num` from `self` with a reduced numbers of digits of the mantissa (see `mantissa()`) required to represent the number:
 	///
 	/// * No more than 3 digits in front of the decimal point.
-	/// 	(1234 → 1.234 k)
+	///     (1234 → 1.234 k)
 	///
 	/// * No zero in front of the decimal point.
-	/// 	(0.001 → 1.0 m)
+	///     (0.001 → 1.0 m)
 	///
 	/// # Example
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1000.0 ).shortened().unwrap(),
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Kilo )
+	///     Num::new( 1000.0 ).shortened().unwrap(),
+	///     Num::new( 1.0 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.001 ).shortened().unwrap(),
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Milli )
+	///     Num::new( 0.001 ).shortened().unwrap(),
+	///     Num::new( 1.0 ).with_prefix( Prefix::Milli )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 1234.5 ).shortened().unwrap(),
-	/// 	Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
+	///     Num::new( 1234.5 ).shortened().unwrap(),
+	///     Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
-	/// 	Num::new( 0.0 )
+	///     Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
+	///     Num::new( 0.0 )
 	/// );
 	/// ```
 	pub fn shortened( self ) -> Result<Self, PrefixError> {
@@ -348,8 +348,8 @@ impl Add for Num {
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Mega ) + Num::new( 1.0 ).with_prefix( Prefix::Micro ),
-	/// 	Num::new( 1.0000000000009999 ).with_prefix( Prefix::Mega )
+	///     Num::new( 1.0 ).with_prefix( Prefix::Mega ) + Num::new( 1.0 ).with_prefix( Prefix::Micro ),
+	///     Num::new( 1.0000000000009999 ).with_prefix( Prefix::Mega )
 	/// );
 	/// ```
 	fn add( self, other: Self ) -> Self::Output {
