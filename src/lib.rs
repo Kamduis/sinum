@@ -19,6 +19,10 @@
 // Modules
 
 
+use std::fmt::Display;
+
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
+
 mod prefix;
 pub use crate::prefix::PrefixError;
 pub use crate::prefix::Prefix;
@@ -34,14 +38,30 @@ pub use crate::unit::Unit;
 mod quantity;
 pub use crate::quantity::Qty;
 
-#[cfg( feature = "tex" )]
-mod latex;
+#[cfg( feature = "tex" )] mod latex;
+#[cfg( feature = "tex" )] pub use crate::latex::{Latex, LatexSym};
+#[cfg( all( feature = "i18n", feature = "tex" ) )] pub use crate::latex::LatexLocale;
+#[cfg( feature = "tex" )] pub use crate::latex::TexOptions;
 
-#[cfg( feature = "tex" )]
-pub use crate::latex::{Latex, LatexSym};
 
-#[cfg( feature = "tex" )]
-pub use crate::latex::TexOptions;
+
+
+//=============================================================================
+// Traits
+
+
+/// Providing a localized `.to_string()`: `.to_string_locale()`.
+///
+/// This Trait is only available, if the **`i18n`** feature has been enabled.
+#[cfg( feature = "i18n" )]
+pub trait DisplayLocale: Display {
+	/// Returns the localized string representation of `self`.
+	///
+	/// The standard implementation ignores `locale` and returns the same string as `.to_string()`.
+	fn to_string_locale( &self, _locale: &LanguageIdentifier ) -> String {
+		self.to_string()
+	}
+}
 
 
 

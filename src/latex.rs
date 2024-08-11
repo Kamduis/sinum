@@ -9,6 +9,10 @@
 
 use std::fmt;
 
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
+
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
+
 
 
 
@@ -33,6 +37,20 @@ pub trait Latex {
 pub trait LatexSym: Latex {
 	/// Converts the entity into a LaTeX-string displaying symbols instead of written units.
 	fn to_latex_sym( &self, options: &TexOptions ) -> String;
+}
+
+
+/// Providing a localized `.to_latex()`: `.to_latex_locale()`.
+///
+/// This Trait is only available, if the both, the **`i18n`** and the **`tex`** features have been enabled.
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+pub trait LatexLocale: DisplayLocale + Latex {
+	/// Returns the localized LaTeX string representation of `self`.
+	///
+	/// The standard implementation ignores `locale` and returns the same string as `.to_latex()`.
+	fn to_latex_locale( &self, _locale: &LanguageIdentifier, options: &TexOptions ) -> String {
+		self.to_latex( options )
+	}
 }
 
 

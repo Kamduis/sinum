@@ -22,6 +22,7 @@ use crate::{Latex, LatexSym};
 #[cfg( feature = "tex" )]
 use crate::TexOptions;
 
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
 #[cfg( feature = "i18n" )] use crate::LOCALES;
 
 
@@ -230,51 +231,6 @@ impl Unit {
 
 		res.to_string()
 	}
-
-	/// Representing unit as string, translating the unit into the language specified by `locale`.
-	///
-	/// # Example
-	///
-	/// ```
-	/// use unic_langid::LanguageIdentifier;
-	/// use unic_langid::langid;
-	/// use sinum::Unit;
-	///
-	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
-	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
-	///
-	/// assert_eq!( Unit::Ampere.to_string_locale( &US_ENGLISH ), "ampere" );
-	/// assert_eq!( Unit::Candela.to_string_locale( &US_ENGLISH ), "candela" );
-	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &US_ENGLISH ), "astronomical unit" );
-	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &GERMAN ), "Astronomische Einheit" );
-	/// assert_eq!( Unit::Ampere.to_string_locale( &GERMAN ), "Amper" );
-	/// assert_eq!( Unit::Candela.to_string_locale( &GERMAN ), "Candela" );
-	/// ```
-	pub fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
-		match self {
-			// Base units
-			Self::Ampere =>    LOCALES.lookup( locale, "ampere" ),
-			Self::Candela =>   LOCALES.lookup( locale, "candela" ),
-			Self::Kelvin =>    LOCALES.lookup( locale, "kelvin" ),
-			Self::Kilogram =>  LOCALES.lookup( locale, "kilogram" ),
-			Self::Meter =>     LOCALES.lookup( locale, "meter" ),
-			Self::Mole =>      LOCALES.lookup( locale, "mol" ),
-			Self::Second =>    LOCALES.lookup( locale, "second" ),
-			// Additional mass units
-			Self::Gram =>      LOCALES.lookup( locale, "gram" ),
-			Self::Tonne =>     LOCALES.lookup( locale, "tonne" ),
-			// Additional length units
-			Self::AstronomicalUnit => LOCALES.lookup( locale, "astronomical_unit" ),
-			Self::Lightyear => LOCALES.lookup( locale, "lightyear" ),
-			Self::Parsec =>    LOCALES.lookup( locale, "parsec" ),
-			//
-			Self::Pascal =>    LOCALES.lookup( locale, "pascal" ),
-			Self::Bar =>       LOCALES.lookup( locale, "bar" ),
-			Self::Sievert =>   LOCALES.lookup( locale, "sievert" ),
-			//
-			_ => self.to_string(),
-		}
-	}
 }
 
 impl FromStr for Unit {
@@ -327,6 +283,54 @@ impl fmt::Display for Unit {
 			Self::Pascal =>    write!( f, "pascal" ),
 			Self::Bar =>       write!( f, "bar" ),
 			Self::Sievert =>   write!( f, "sievert" ),
+		}
+	}
+}
+
+#[cfg( feature = "i18n" )]
+impl DisplayLocale for Unit {
+	/// Representing unit as string, translating the unit into the language specified by `locale`.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use unic_langid::LanguageIdentifier;
+	/// use unic_langid::langid;
+	/// use sinum::Unit;
+	///
+	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
+	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
+	///
+	/// assert_eq!( Unit::Ampere.to_string_locale( &US_ENGLISH ), "ampere" );
+	/// assert_eq!( Unit::Candela.to_string_locale( &US_ENGLISH ), "candela" );
+	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &US_ENGLISH ), "astronomical unit" );
+	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &GERMAN ), "Astronomische Einheit" );
+	/// assert_eq!( Unit::Ampere.to_string_locale( &GERMAN ), "Amper" );
+	/// assert_eq!( Unit::Candela.to_string_locale( &GERMAN ), "Candela" );
+	/// ```
+	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
+		match self {
+			// Base units
+			Self::Ampere =>    LOCALES.lookup( locale, "ampere" ),
+			Self::Candela =>   LOCALES.lookup( locale, "candela" ),
+			Self::Kelvin =>    LOCALES.lookup( locale, "kelvin" ),
+			Self::Kilogram =>  LOCALES.lookup( locale, "kilogram" ),
+			Self::Meter =>     LOCALES.lookup( locale, "meter" ),
+			Self::Mole =>      LOCALES.lookup( locale, "mol" ),
+			Self::Second =>    LOCALES.lookup( locale, "second" ),
+			// Additional mass units
+			Self::Gram =>      LOCALES.lookup( locale, "gram" ),
+			Self::Tonne =>     LOCALES.lookup( locale, "tonne" ),
+			// Additional length units
+			Self::AstronomicalUnit => LOCALES.lookup( locale, "astronomical_unit" ),
+			Self::Lightyear => LOCALES.lookup( locale, "lightyear" ),
+			Self::Parsec =>    LOCALES.lookup( locale, "parsec" ),
+			//
+			Self::Pascal =>    LOCALES.lookup( locale, "pascal" ),
+			Self::Bar =>       LOCALES.lookup( locale, "bar" ),
+			Self::Sievert =>   LOCALES.lookup( locale, "sievert" ),
+			//
+			_ => self.to_string(),
 		}
 	}
 }
