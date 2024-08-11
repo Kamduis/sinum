@@ -1,6 +1,6 @@
 # German
 
-ampere = Amper
+ampere = Ampere
 candela = Candela
 kelvin = Kelvin
 kilogram = Kilogramm
