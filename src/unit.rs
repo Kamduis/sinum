@@ -272,7 +272,7 @@ impl Unit {
 			Self::Bar =>       LOCALES.lookup( locale, "bar" ),
 			Self::Sievert =>   LOCALES.lookup( locale, "sievert" ),
 			//
-			_ => return self.to_string(),
+			_ => self.to_string(),
 		}
 	}
 }
@@ -362,24 +362,24 @@ impl LatexSym for Unit {
 		match self {
 			Self::Custom( x ) => x.clone(),
 			// Base units
-			Self::Ampere =>    format!( r"\ampere" ),
-			Self::Candela =>   format!( r"\candela" ),
-			Self::Kelvin =>    format!( r"\kelvin" ),
-			Self::Kilogram =>  format!( r"\kilogram" ),
-			Self::Meter =>     format!( r"\meter" ),
-			Self::Mole =>      format!( r"\mol" ),
-			Self::Second =>    format!( r"\second" ),
+			Self::Ampere =>    r"\ampere".to_string(),
+			Self::Candela =>   r"\candela".to_string(),
+			Self::Kelvin =>    r"\kelvin".to_string(),
+			Self::Kilogram =>  r"\kilogram".to_string(),
+			Self::Meter =>     r"\meter".to_string(),
+			Self::Mole =>      r"\mol".to_string(),
+			Self::Second =>    r"\second".to_string(),
 			// Additional mass units
-			Self::Gram =>      format!( r"\gram" ),
-			Self::Tonne =>     format!( r"\tonne" ),
+			Self::Gram =>      r"\gram".to_string(),
+			Self::Tonne =>     r"\tonne".to_string(),
 			// Additional length units
-			Self::AstronomicalUnit => format!( r"\astronomicalunit" ),
-			Self::Lightyear => format!( r"\lightyear" ),
-			Self::Parsec =>    format!( r"\parsec" ),
+			Self::AstronomicalUnit => r"\astronomicalunit".to_string(),
+			Self::Lightyear => r"\lightyear".to_string(),
+			Self::Parsec =>    r"\parsec".to_string(),
 			//
-			Self::Pascal =>    format!( r"\pascal" ),
-			Self::Bar =>       format!( r"\bar" ),
-			Self::Sievert =>   format!( r"\sievert" ),
+			Self::Pascal =>    r"\pascal".to_string(),
+			Self::Bar =>       r"\bar".to_string(),
+			Self::Sievert =>   r"\sievert".to_string(),
 		}
 	}
 }
