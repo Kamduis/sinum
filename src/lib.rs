@@ -19,7 +19,7 @@
 // Modules
 
 
-use std::fmt::Display;
+use std::fmt;
 
 #[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
 
@@ -54,11 +54,12 @@ pub use crate::quantity::Qty;
 ///
 /// This Trait is only available, if the **`i18n`** feature has been enabled.
 #[cfg( feature = "i18n" )]
-pub trait DisplayLocale: Display {
+pub trait DisplayLocale: fmt::Display {
 	/// Returns the localized string representation of `self`.
 	///
 	/// The standard implementation ignores `locale` and returns the same string as `.to_string()`.
-	fn to_string_locale( &self, _locale: &LanguageIdentifier ) -> String {
+	#[allow( unused_variables )]
+	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
 		self.to_string()
 	}
 }

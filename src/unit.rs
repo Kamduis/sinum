@@ -17,10 +17,9 @@ use thiserror::Error;
 #[cfg( feature = "i18n" )] use fluent_templates::Loader;
 #[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
 
-#[cfg( feature = "tex" )]
-use crate::{Latex, LatexSym};
-#[cfg( feature = "tex" )]
-use crate::TexOptions;
+#[cfg( feature = "tex" )] use crate::{Latex, LatexSym};
+#[cfg( all( feature = "i18n", feature = "tex" ) )] use crate::LatexLocale;
+#[cfg( feature = "tex" )] use crate::TexOptions;
 
 #[cfg( feature = "i18n" )] use crate::DisplayLocale;
 #[cfg( feature = "i18n" )] use crate::LOCALES;
@@ -337,20 +336,10 @@ impl DisplayLocale for Unit {
 }
 
 #[cfg( feature = "tex" )]
-impl Latex for Unit {
-	/// Return the name of the unit as string. This is identical to `.to_string()`.
-	///
-	/// # Example
-	/// ```
-	/// # use sinum::Latex;
-	/// # use sinum::{Unit, TexOptions};
-	/// assert_eq!( Unit::Meter.to_latex( &TexOptions::none() ), "meter".to_string() );
-	/// assert_eq!( Unit::Second.to_latex( &TexOptions::new() ), "second".to_string() );
-	/// ```
-	fn to_latex( &self, _options: &TexOptions ) -> String {
-		self.to_string()
-	}
-}
+impl Latex for Unit {}
+
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+impl LatexLocale for Unit {}
 
 #[cfg( feature = "tex" )]
 impl LatexSym for Unit {

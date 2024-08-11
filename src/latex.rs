@@ -24,19 +24,14 @@ use std::fmt;
 ///
 /// This Trait is only available, if the **`tex`** feature has been enabled.
 #[cfg( feature = "tex" )]
-pub trait Latex {
+pub trait Latex: fmt::Display {
 	/// Converts the entity into a LaTeX-string.
-	fn to_latex( &self, options: &TexOptions ) -> String;
-}
-
-
-/// Providing conversion into LaTeX code to print symbols instead of text. This is mostly implemented to print out prefixes and units like `\kilo\meter` or `\milli\ampere` (using the LaTeX package `{siunitx}` instead of words.
-///
-/// This Trait is only available, if the **`tex`** feature has been enabled.
-#[cfg( feature = "tex" )]
-pub trait LatexSym: Latex {
-	/// Converts the entity into a LaTeX-string displaying symbols instead of written units.
-	fn to_latex_sym( &self, options: &TexOptions ) -> String;
+	///
+	/// The standard implementation ignores `options` and returns the same as `.to_string()`.
+	#[allow( unused_variables )]
+	fn to_latex( &self, options: &TexOptions ) -> String {
+		self.to_string()
+	}
 }
 
 
@@ -47,10 +42,21 @@ pub trait LatexSym: Latex {
 pub trait LatexLocale: DisplayLocale + Latex {
 	/// Returns the localized LaTeX string representation of `self`.
 	///
-	/// The standard implementation ignores `locale` and returns the same string as `.to_latex()`.
-	fn to_latex_locale( &self, _locale: &LanguageIdentifier, options: &TexOptions ) -> String {
-		self.to_latex( options )
+	/// The standard implementation ignores `options` and returns the same string as `.to_string_locale()`.
+	#[allow( unused_variables )]
+	fn to_latex_locale( &self, locale: &LanguageIdentifier, options: &TexOptions ) -> String {
+		self.to_string_locale( locale )
 	}
+}
+
+
+/// Providing conversion into LaTeX code to print symbols instead of text. This is mostly implemented to print out prefixes and units like `\kilo\meter` or `\milli\ampere` (using the LaTeX package `{siunitx}` instead of words.
+///
+/// This Trait is only available, if the **`tex`** feature has been enabled.
+#[cfg( feature = "tex" )]
+pub trait LatexSym: Latex {
+	/// Converts the entity into a LaTeX-string displaying symbols instead of written units.
+	fn to_latex_sym( &self, options: &TexOptions ) -> String;
 }
 
 

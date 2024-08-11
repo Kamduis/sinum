@@ -319,47 +319,10 @@ impl DisplayLocale for Prefix {
 }
 
 #[cfg( feature = "tex" )]
-impl Latex for Prefix {
-	/// Return a string that represents this `Prefix` as LaTeX text. This is identical to `.to_string()`.
-	///
-	/// # Example
-	/// ```
-	/// # use sinum::Latex;
-	/// # use sinum::{Prefix, TexOptions};
-	/// assert_eq!( Prefix::Femto.to_latex( &TexOptions::none() ), "femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex( &TexOptions::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex( &TexOptions::none() ), "giga".to_string() );
-	/// ```
-	fn to_latex( &self, _options: &TexOptions ) -> String {
-		self.to_string()
-	}
-}
+impl Latex for Prefix {}
 
 #[cfg( all( feature = "i18n", feature = "tex" ) )]
-impl LatexLocale for Prefix {
-	/// Return a string that represents this `Prefix` as localized LaTeX text. This is identical to `.to_string_locale()`.
-	///
-	/// # Example
-	/// ```
-	/// use unic_langid::LanguageIdentifier;
-	/// use unic_langid::langid;
-	/// use sinum::{Latex, LatexLocale};
-	/// use sinum::{Prefix, TexOptions};
-	///
-	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
-	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
-	///
-	/// assert_eq!( Prefix::Femto.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "femto".to_string() );
-	/// assert_eq!( Prefix::Femto.to_latex_locale( &GERMAN, &TexOptions::none() ), "Femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex_locale( &GERMAN, &TexOptions::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "giga".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex_locale( &GERMAN, &TexOptions::none() ), "Giga".to_string() );
-	/// ```
-	fn to_latex_locale( &self, locale: &LanguageIdentifier, _options: &TexOptions ) -> String {
-		self.to_string_locale( locale )
-	}
-}
+impl LatexLocale for Prefix {}
 
 #[cfg( feature = "tex" )]
 impl LatexSym for Prefix {
