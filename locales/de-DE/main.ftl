@@ -1,5 +1,31 @@
 # German
 
+# SI Prefixes
+
+yocto = Yokto
+zepto = Zepto
+atto = Atto
+femto = Femto
+pico = Piko
+nano = Nano
+micro = Mikro
+milli = Milli
+centi = Zenti
+deci = Dezi
+deca = Deka
+hecto = Hekto
+kilo = Kilo
+mega = Mega
+giga = Giga
+tera = Tera
+peta = Peta
+exa = Exa
+zetta = Zetta
+yotta = Yotta
+
+
+# SI Units
+
 ampere = Ampere
 candela = Candela
 kelvin = Kelvin

@@ -296,17 +296,18 @@ impl DisplayLocale for Unit {
 	/// ```
 	/// use unic_langid::LanguageIdentifier;
 	/// use unic_langid::langid;
+	/// use sinum::DisplayLocale;
 	/// use sinum::Unit;
 	///
 	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
 	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
 	///
 	/// assert_eq!( Unit::Ampere.to_string_locale( &US_ENGLISH ), "ampere" );
+	/// assert_eq!( Unit::Ampere.to_string_locale( &GERMAN ), "Ampere" );
 	/// assert_eq!( Unit::Candela.to_string_locale( &US_ENGLISH ), "candela" );
+	/// assert_eq!( Unit::Candela.to_string_locale( &GERMAN ), "Candela" );
 	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &US_ENGLISH ), "astronomical unit" );
 	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &GERMAN ), "Astronomische Einheit" );
-	/// assert_eq!( Unit::Ampere.to_string_locale( &GERMAN ), "Amper" );
-	/// assert_eq!( Unit::Candela.to_string_locale( &GERMAN ), "Candela" );
 	/// ```
 	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
 		match self {

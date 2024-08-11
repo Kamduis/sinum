@@ -10,15 +10,18 @@
 use std::fmt;
 use std::str::FromStr;
 
+#[cfg( feature = "i18n" )] use fluent_templates::Loader;
 use thiserror::Error;
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
 
-#[cfg( feature = "tex" )]
-use crate::{Latex, LatexSym};
-#[cfg( feature = "tex" )]
-use crate::TexOptions;
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
+#[cfg( feature = "tex" )] use crate::{Latex, LatexSym};
+#[cfg( all( feature = "i18n", feature = "tex" ) )] use crate::LatexLocale;
+#[cfg( feature = "tex" )] use crate::TexOptions;
+#[cfg( feature = "i18n" )] use crate::LOCALES;
 
 
 
@@ -287,6 +290,34 @@ impl fmt::Display for Prefix {
 	}
 }
 
+impl DisplayLocale for Prefix {
+	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
+		match self {
+			Self::Yocto =>   LOCALES.lookup( locale, "yocto" ),
+			Self::Zepto =>   LOCALES.lookup( locale, "zepto" ),
+			Self::Atto =>    LOCALES.lookup( locale, "atto" ),
+			Self::Femto =>   LOCALES.lookup( locale, "femto" ),
+			Self::Pico =>    LOCALES.lookup( locale, "pico" ),
+			Self::Nano =>    LOCALES.lookup( locale, "nano" ),
+			Self::Micro =>   LOCALES.lookup( locale, "micro" ),
+			Self::Milli =>   LOCALES.lookup( locale, "milli" ),
+			Self::Centi =>   LOCALES.lookup( locale, "centi" ),
+			Self::Deci =>    LOCALES.lookup( locale, "deci" ),
+			Self::Nothing => "".to_string(),
+			Self::Deca =>    LOCALES.lookup( locale, "deca" ),
+			Self::Hecto =>   LOCALES.lookup( locale, "hecto" ),
+			Self::Kilo =>    LOCALES.lookup( locale, "kilo" ),
+			Self::Mega =>    LOCALES.lookup( locale, "mega" ),
+			Self::Giga =>    LOCALES.lookup( locale, "giga" ),
+			Self::Tera =>    LOCALES.lookup( locale, "tera" ),
+			Self::Peta =>    LOCALES.lookup( locale, "peta" ),
+			Self::Exa =>     LOCALES.lookup( locale, "exa" ),
+			Self::Zetta =>   LOCALES.lookup( locale, "zetta" ),
+			Self::Yotta =>   LOCALES.lookup( locale, "yotta" ),
+		}
+	}
+}
+
 #[cfg( feature = "tex" )]
 impl Latex for Prefix {
 	/// Return a string that represents this `Prefix` as LaTeX text. This is identical to `.to_string()`.
@@ -301,6 +332,32 @@ impl Latex for Prefix {
 	/// ```
 	fn to_latex( &self, _options: &TexOptions ) -> String {
 		self.to_string()
+	}
+}
+
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+impl LatexLocale for Prefix {
+	/// Return a string that represents this `Prefix` as localized LaTeX text. This is identical to `.to_string_locale()`.
+	///
+	/// # Example
+	/// ```
+	/// use unic_langid::LanguageIdentifier;
+	/// use unic_langid::langid;
+	/// use sinum::{Latex, LatexLocale};
+	/// use sinum::{Prefix, TexOptions};
+	///
+	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
+	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
+	///
+	/// assert_eq!( Prefix::Femto.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "femto".to_string() );
+	/// assert_eq!( Prefix::Femto.to_latex_locale( &GERMAN, &TexOptions::none() ), "Femto".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Nothing.to_latex_locale( &GERMAN, &TexOptions::none() ), "".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex_locale( &US_ENGLISH, &TexOptions::none() ), "giga".to_string() );
+	/// assert_eq!( Prefix::Giga.to_latex_locale( &GERMAN, &TexOptions::none() ), "Giga".to_string() );
+	/// ```
+	fn to_latex_locale( &self, locale: &LanguageIdentifier, _options: &TexOptions ) -> String {
+		self.to_string_locale( locale )
 	}
 }
 
