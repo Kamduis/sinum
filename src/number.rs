@@ -277,7 +277,7 @@ impl PartialEq<f64> for Num {
 	/// assert!( Num::new( 2.0 ).with_prefix( Prefix::Kilo ) == 2e3 );
 	/// ```
 	fn eq( &self, other: &f64 ) -> bool {
-		self.as_f64().eq( &other )
+		self.as_f64().eq( other )
 	}
 }
 
@@ -305,7 +305,7 @@ impl PartialOrd for Num {
 
 impl PartialOrd<f64> for Num {
 	fn partial_cmp( &self, other: &f64 ) -> Option<Ordering> {
-		self.as_f64().partial_cmp( &other )
+		self.as_f64().partial_cmp( other )
 	}
 
 	fn lt( &self, other: &f64 ) -> bool {
