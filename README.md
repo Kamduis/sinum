@@ -94,6 +94,7 @@ assert_eq!( qty_milli.as_f64(), 9.9 );
 
 ## Optional Features
 
+* **i18n:** Enables internationalization support using [`fluent_templates`][].
 * **serde:** Enables [`serde`][] support.
 * **tex:** Enables returning [`Prefix`][]es and [`Num`][]s as strings usable directly by LaTeX (to be used with the `{siunitx}` LaTeX-package).
 
@@ -119,6 +120,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`Num`]: https://docs.rs/sinum/latest/sinum/struct.Num.html
 [`Prefix`]: https://docs.rs/sinum/latest/sinum/struct.Prefix.html
 [`Qty`]: https://docs.rs/sinum/latest/sinum/struct.Qty.html
+[`fluent_templates`]: https://docs.rs/fluent-templates/latest/fluent_templates/
 [`serde`]: https://docs.rs/serde/latest/serde/
 [LICENSE-APACHE]: LICENSE-APACHE
 [LICENSE-MIT]: LICENSE-MIT
