@@ -116,9 +116,9 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 
 [1]: https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf
-[`Num`]: https://docs.rs/sinum/latest/struct.Num.html
-[`Prefix`]: https://docs.rs/sinum/latest/struct.Prefix.html
-[`Qty`]: https://docs.rs/sinum/latest/struct.Qty.html
+[`Num`]: https://docs.rs/sinum/latest/sinum/struct.Num.html
+[`Prefix`]: https://docs.rs/sinum/latest/sinum/struct.Prefix.html
+[`Qty`]: https://docs.rs/sinum/latest/sinum/struct.Qty.html
 [`serde`]: https://docs.rs/serde/latest/serde/
 [LICENSE-APACHE]: LICENSE-APACHE
 [LICENSE-MIT]: LICENSE-MIT
