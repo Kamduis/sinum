@@ -70,10 +70,10 @@ impl Qty {
 	/// Creates a new `Qty` from `self` with a reduced numbers of digits of the mantissa (see `mantissa()`) required to represent the number:
 	///
 	/// * No more than 3 digits in front of the decimal point.
-	/// 	(1234 s → 1.234 ks)
+	///     (1234 s → 1.234 ks)
 	///
 	/// * No zero in front of the decimal point.
-	/// 	(0.001 A → 1.0 mA)
+	///     (0.001 A → 1.0 mA)
 	///
 	/// This function will only modify the prefix, never the unit itself. (see `sorten_unit()`).
 	///
@@ -81,12 +81,12 @@ impl Qty {
 	/// ```
 	/// # use sinum::{Qty, Num, Unit, Prefix};
 	/// assert_eq!(
-	/// 	Qty::new( 1000.0.into(), &Unit::Ampere ).shortened().unwrap(),
-	/// 	Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), &Unit::Ampere )
+	///     Qty::new( 1000.0.into(), &Unit::Ampere ).shortened().unwrap(),
+	///     Qty::new( Num::new( 1.0.into() ).with_prefix( Prefix::Kilo ), &Unit::Ampere )
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( 0.001.into(), &Unit::Candela ).shortened().unwrap(),
-	/// 	Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), &Unit::Candela )
+	///     Qty::new( 0.001.into(), &Unit::Candela ).shortened().unwrap(),
+	///     Qty::new( Num::new( 1.0 ).with_prefix( Prefix::Milli ), &Unit::Candela )
 	/// );
 	/// ```
 	pub fn shortened( self ) -> Result<Self, PrefixError> {
@@ -277,7 +277,7 @@ impl PartialEq<f64> for Qty {
 	/// assert!( Qty::new( Num::new( 2.0 ).with_prefix( Prefix::Kilo ), &Unit::Second ) == 2e3 );
 	/// ```
 	fn eq( &self, other: &f64 ) -> bool {
-		self.as_f64().eq( &other )
+		self.as_f64().eq( other )
 	}
 }
 
@@ -305,7 +305,7 @@ impl PartialOrd for Qty {
 
 impl PartialOrd<f64> for Qty {
 	fn partial_cmp( &self, other: &f64 ) -> Option<Ordering> {
-		self.as_f64().partial_cmp( &other )
+		self.as_f64().partial_cmp( other )
 	}
 
 	fn lt( &self, other: &f64 ) -> bool {
@@ -614,8 +614,8 @@ impl LatexSym for Qty {
 	/// # use sinum::{Qty, Unit, Num, Prefix, TexOptions};
 	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Ampere ).to_latex_sym( &TexOptions::none() ), r"\qty{9.9}{\ampere}".to_string() );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Ampere ).to_latex_sym( &TexOptions::none() ),
-	/// 	r"\qty{9.9}{\milli\ampere}".to_string()
+	///     Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Ampere ).to_latex_sym( &TexOptions::none() ),
+	///     r"\qty{9.9}{\milli\ampere}".to_string()
 	/// );
 	/// ```
 	///
@@ -627,27 +627,27 @@ impl LatexSym for Qty {
 	/// # use sinum::{Qty, Unit, Num, Prefix, TexOptions};
 	/// assert_eq!( Qty::new( 9.9.into(), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ), r"\qty{9.9}{\kilogram}".to_string() );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ),
-	/// 	r"\qty{9.9}{\mega\gram}".to_string()
+	///     Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ),
+	///     r"\qty{9.9}{\mega\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kilogram ).to_latex_sym(
-	/// 		&TexOptions::new()
-	/// 			.minimum_decimal_digits( 1 )
-	/// 	),
-	/// 	r"\qty{9.9}{\gram}".to_string()
+	///     Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Kilogram ).to_latex_sym(
+	///         &TexOptions::new()
+	///             .minimum_decimal_digits( 1 )
+	///     ),
+	///     r"\qty{9.9}{\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ),
-	/// 	r"\qty{9.9}{\milli\gram}".to_string()
+	///     Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Micro ), &Unit::Kilogram ).to_latex_sym( &TexOptions::new() ),
+	///     r"\qty{9.9}{\milli\gram}".to_string()
 	/// );
 	/// assert_eq!( Qty::new(
-	/// 	Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_latex_sym( &TexOptions::new() ),
-	/// 	r"\qty{9.9}{\milli\gram}".to_string()
+	///     Num::new( 9.9 ).with_prefix( Prefix::Milli ), &Unit::Gram ).to_latex_sym( &TexOptions::new() ),
+	///     r"\qty{9.9}{\milli\gram}".to_string()
 	/// );
 	/// assert_eq!(
-	/// 	Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_latex_sym( &TexOptions::new() ),
-	/// 	r"\qty{9.9}{\kilogram}".to_string()
+	///     Qty::new( Num::new( 9.9 ).with_prefix( Prefix::Kilo ), &Unit::Gram ).to_latex_sym( &TexOptions::new() ),
+	///     r"\qty{9.9}{\kilogram}".to_string()
 	/// );
 	/// ```
 	fn to_latex_sym( &self, options: &TexOptions ) -> String {

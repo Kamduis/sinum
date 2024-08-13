@@ -10,15 +10,18 @@
 use std::fmt;
 use std::str::FromStr;
 
+#[cfg( feature = "i18n" )] use fluent_templates::Loader;
 use thiserror::Error;
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
 
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
 
-#[cfg( feature = "tex" )]
-use crate::{Latex, LatexSym};
-#[cfg( feature = "tex" )]
-use crate::TexOptions;
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
+#[cfg( feature = "tex" )] use crate::{Latex, LatexSym};
+#[cfg( all( feature = "i18n", feature = "tex" ) )] use crate::LatexLocale;
+#[cfg( feature = "tex" )] use crate::TexOptions;
+#[cfg( feature = "i18n" )] use crate::LOCALES;
 
 
 
@@ -287,22 +290,40 @@ impl fmt::Display for Prefix {
 	}
 }
 
-#[cfg( feature = "tex" )]
-impl Latex for Prefix {
-	/// Return a string that represents this `Prefix` as LaTeX text. This is identical to `.to_string()`.
-	///
-	/// # Example
-	/// ```
-	/// # use sinum::Latex;
-	/// # use sinum::{Prefix, TexOptions};
-	/// assert_eq!( Prefix::Femto.to_latex( &TexOptions::none() ), "femto".to_string() );
-	/// assert_eq!( Prefix::Nothing.to_latex( &TexOptions::none() ), "".to_string() );
-	/// assert_eq!( Prefix::Giga.to_latex( &TexOptions::none() ), "giga".to_string() );
-	/// ```
-	fn to_latex( &self, _options: &TexOptions ) -> String {
-		self.to_string()
+#[cfg( feature = "i18n" )]
+impl DisplayLocale for Prefix {
+	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
+		match self {
+			Self::Yocto =>   LOCALES.lookup( locale, "yocto" ),
+			Self::Zepto =>   LOCALES.lookup( locale, "zepto" ),
+			Self::Atto =>    LOCALES.lookup( locale, "atto" ),
+			Self::Femto =>   LOCALES.lookup( locale, "femto" ),
+			Self::Pico =>    LOCALES.lookup( locale, "pico" ),
+			Self::Nano =>    LOCALES.lookup( locale, "nano" ),
+			Self::Micro =>   LOCALES.lookup( locale, "micro" ),
+			Self::Milli =>   LOCALES.lookup( locale, "milli" ),
+			Self::Centi =>   LOCALES.lookup( locale, "centi" ),
+			Self::Deci =>    LOCALES.lookup( locale, "deci" ),
+			Self::Nothing => "".to_string(),
+			Self::Deca =>    LOCALES.lookup( locale, "deca" ),
+			Self::Hecto =>   LOCALES.lookup( locale, "hecto" ),
+			Self::Kilo =>    LOCALES.lookup( locale, "kilo" ),
+			Self::Mega =>    LOCALES.lookup( locale, "mega" ),
+			Self::Giga =>    LOCALES.lookup( locale, "giga" ),
+			Self::Tera =>    LOCALES.lookup( locale, "tera" ),
+			Self::Peta =>    LOCALES.lookup( locale, "peta" ),
+			Self::Exa =>     LOCALES.lookup( locale, "exa" ),
+			Self::Zetta =>   LOCALES.lookup( locale, "zetta" ),
+			Self::Yotta =>   LOCALES.lookup( locale, "yotta" ),
+		}
 	}
 }
+
+#[cfg( feature = "tex" )]
+impl Latex for Prefix {}
+
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+impl LatexLocale for Prefix {}
 
 #[cfg( feature = "tex" )]
 impl LatexSym for Prefix {
@@ -318,27 +339,27 @@ impl LatexSym for Prefix {
 	/// ```
 	fn to_latex_sym( &self, _options: &TexOptions ) -> String {
 		match self {
-			Self::Yocto =>   format!( r"\yocto" ),
-			Self::Zepto =>   format!( r"\zepto" ),
-			Self::Atto =>    format!( r"\atto" ),
-			Self::Femto =>   format!( r"\femto" ),
-			Self::Pico =>    format!( r"\pico" ),
-			Self::Nano =>    format!( r"\nano" ),
-			Self::Micro =>   format!( r"\micro" ),
-			Self::Milli =>   format!( r"\milli" ),
-			Self::Centi =>   format!( r"\centi" ),
-			Self::Deci =>    format!( r"\deca" ),
-			Self::Nothing => format!( "" ),
-			Self::Deca =>    format!( r"\deca" ),
-			Self::Hecto =>   format!( r"\hecto" ),
-			Self::Kilo =>    format!( r"\kilo" ),
-			Self::Mega =>    format!( r"\mega" ),
-			Self::Giga =>    format!( r"\giga" ),
-			Self::Tera =>    format!( r"\tera" ),
-			Self::Peta =>    format!( r"\peta" ),
-			Self::Exa =>     format!( r"\exa" ),
-			Self::Zetta =>   format!( r"\zetta" ),
-			Self::Yotta =>   format!( r"\yotta" ),
+			Self::Yocto =>   r"\yocto".to_string(),
+			Self::Zepto =>   r"\zepto".to_string(),
+			Self::Atto =>    r"\atto".to_string(),
+			Self::Femto =>   r"\femto".to_string(),
+			Self::Pico =>    r"\pico".to_string(),
+			Self::Nano =>    r"\nano".to_string(),
+			Self::Micro =>   r"\micro".to_string(),
+			Self::Milli =>   r"\milli".to_string(),
+			Self::Centi =>   r"\centi".to_string(),
+			Self::Deci =>    r"\deca".to_string(),
+			Self::Nothing => "".to_string(),
+			Self::Deca =>    r"\deca".to_string(),
+			Self::Hecto =>   r"\hecto".to_string(),
+			Self::Kilo =>    r"\kilo".to_string(),
+			Self::Mega =>    r"\mega".to_string(),
+			Self::Giga =>    r"\giga".to_string(),
+			Self::Tera =>    r"\tera".to_string(),
+			Self::Peta =>    r"\peta".to_string(),
+			Self::Exa =>     r"\exa".to_string(),
+			Self::Zetta =>   r"\zetta".to_string(),
+			Self::Yotta =>   r"\yotta".to_string(),
 		}
 	}
 }

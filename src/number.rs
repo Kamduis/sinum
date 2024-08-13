@@ -103,29 +103,29 @@ impl Num {
 	/// Creates a new `Num` from `self` with a reduced numbers of digits of the mantissa (see `mantissa()`) required to represent the number:
 	///
 	/// * No more than 3 digits in front of the decimal point.
-	/// 	(1234 → 1.234 k)
+	///     (1234 → 1.234 k)
 	///
 	/// * No zero in front of the decimal point.
-	/// 	(0.001 → 1.0 m)
+	///     (0.001 → 1.0 m)
 	///
 	/// # Example
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1000.0 ).shortened().unwrap(),
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Kilo )
+	///     Num::new( 1000.0 ).shortened().unwrap(),
+	///     Num::new( 1.0 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.001 ).shortened().unwrap(),
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Milli )
+	///     Num::new( 0.001 ).shortened().unwrap(),
+	///     Num::new( 1.0 ).with_prefix( Prefix::Milli )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 1234.5 ).shortened().unwrap(),
-	/// 	Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
+	///     Num::new( 1234.5 ).shortened().unwrap(),
+	///     Num::new( 1.2345 ).with_prefix( Prefix::Kilo )
 	/// );
 	/// assert_eq!(
-	/// 	Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
-	/// 	Num::new( 0.0 )
+	///     Num::new( 0.0 ).with_prefix( Prefix::Mega ).shortened().unwrap(),
+	///     Num::new( 0.0 )
 	/// );
 	/// ```
 	pub fn shortened( self ) -> Result<Self, PrefixError> {
@@ -277,7 +277,7 @@ impl PartialEq<f64> for Num {
 	/// assert!( Num::new( 2.0 ).with_prefix( Prefix::Kilo ) == 2e3 );
 	/// ```
 	fn eq( &self, other: &f64 ) -> bool {
-		self.as_f64().eq( &other )
+		self.as_f64().eq( other )
 	}
 }
 
@@ -305,7 +305,7 @@ impl PartialOrd for Num {
 
 impl PartialOrd<f64> for Num {
 	fn partial_cmp( &self, other: &f64 ) -> Option<Ordering> {
-		self.as_f64().partial_cmp( &other )
+		self.as_f64().partial_cmp( other )
 	}
 
 	fn lt( &self, other: &f64 ) -> bool {
@@ -348,8 +348,8 @@ impl Add for Num {
 	/// ```
 	/// # use sinum::{Num, Prefix};
 	/// assert_eq!(
-	/// 	Num::new( 1.0 ).with_prefix( Prefix::Mega ) + Num::new( 1.0 ).with_prefix( Prefix::Micro ),
-	/// 	Num::new( 1.0000000000009999 ).with_prefix( Prefix::Mega )
+	///     Num::new( 1.0 ).with_prefix( Prefix::Mega ) + Num::new( 1.0 ).with_prefix( Prefix::Micro ),
+	///     Num::new( 1.0000000000009999 ).with_prefix( Prefix::Mega )
 	/// );
 	/// ```
 	fn add( self, other: Self ) -> Self::Output {
@@ -590,9 +590,12 @@ impl From<f64> for Num {
 
 impl fmt::Display for Num {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
+		// Avoiding print output like "0.100000000012".
+		let mantissa_rounded = ( self.mantissa * 1e6 ).round() / 1e6;
+
 		match self.prefix {
-			Prefix::Nothing => write!( f, "{}", self.mantissa ),
-			_ => write!( f, "{} {}", self.mantissa, self.prefix.to_string_sym() )
+			Prefix::Nothing => write!( f, "{}", mantissa_rounded ),
+			_ => write!( f, "{} {}", mantissa_rounded, self.prefix.to_string_sym() )
 		}
 	}
 }

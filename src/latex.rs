@@ -9,6 +9,10 @@
 
 use std::fmt;
 
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
+
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
+
 
 
 
@@ -20,9 +24,29 @@ use std::fmt;
 ///
 /// This Trait is only available, if the **`tex`** feature has been enabled.
 #[cfg( feature = "tex" )]
-pub trait Latex {
+pub trait Latex: fmt::Display {
 	/// Converts the entity into a LaTeX-string.
-	fn to_latex( &self, options: &TexOptions ) -> String;
+	///
+	/// The standard implementation ignores `options` and returns the same as `.to_string()`.
+	#[allow( unused_variables )]
+	fn to_latex( &self, options: &TexOptions ) -> String {
+		self.to_string()
+	}
+}
+
+
+/// Providing a localized `.to_latex()`: `.to_latex_locale()`.
+///
+/// This Trait is only available, if the both, the **`i18n`** and the **`tex`** features have been enabled.
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+pub trait LatexLocale: DisplayLocale + Latex {
+	/// Returns the localized LaTeX string representation of `self`.
+	///
+	/// The standard implementation ignores `options` and returns the same string as `.to_string_locale()`.
+	#[allow( unused_variables )]
+	fn to_latex_locale( &self, locale: &LanguageIdentifier, options: &TexOptions ) -> String {
+		self.to_string_locale( locale )
+	}
 }
 
 

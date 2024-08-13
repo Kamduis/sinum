@@ -14,10 +14,15 @@ use std::str::FromStr;
 use serde::{Serialize, Deserialize};
 use thiserror::Error;
 
-#[cfg( feature = "tex" )]
-use crate::{Latex, LatexSym};
-#[cfg( feature = "tex" )]
-use crate::TexOptions;
+#[cfg( feature = "i18n" )] use fluent_templates::Loader;
+#[cfg( feature = "i18n" )] use unic_langid::LanguageIdentifier;
+
+#[cfg( feature = "tex" )] use crate::{Latex, LatexSym};
+#[cfg( all( feature = "i18n", feature = "tex" ) )] use crate::LatexLocale;
+#[cfg( feature = "tex" )] use crate::TexOptions;
+
+#[cfg( feature = "i18n" )] use crate::DisplayLocale;
+#[cfg( feature = "i18n" )] use crate::LOCALES;
 
 
 
@@ -281,21 +286,60 @@ impl fmt::Display for Unit {
 	}
 }
 
-#[cfg( feature = "tex" )]
-impl Latex for Unit {
-	/// Return the name of the unit as string. This is identical to `.to_string()`.
+#[cfg( feature = "i18n" )]
+impl DisplayLocale for Unit {
+	/// Representing unit as string, translating the unit into the language specified by `locale`.
 	///
 	/// # Example
+	///
 	/// ```
-	/// # use sinum::Latex;
-	/// # use sinum::{Unit, TexOptions};
-	/// assert_eq!( Unit::Meter.to_latex( &TexOptions::none() ), "meter".to_string() );
-	/// assert_eq!( Unit::Second.to_latex( &TexOptions::new() ), "second".to_string() );
+	/// use unic_langid::LanguageIdentifier;
+	/// use unic_langid::langid;
+	/// use sinum::DisplayLocale;
+	/// use sinum::Unit;
+	///
+	/// const US_ENGLISH: LanguageIdentifier = langid!( "en-US" );
+	/// const GERMAN: LanguageIdentifier = langid!( "de-DE" );
+	///
+	/// assert_eq!( Unit::Ampere.to_string_locale( &US_ENGLISH ), "ampere" );
+	/// assert_eq!( Unit::Ampere.to_string_locale( &GERMAN ), "Ampere" );
+	/// assert_eq!( Unit::Candela.to_string_locale( &US_ENGLISH ), "candela" );
+	/// assert_eq!( Unit::Candela.to_string_locale( &GERMAN ), "Candela" );
+	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &US_ENGLISH ), "astronomical unit" );
+	/// assert_eq!( Unit::AstronomicalUnit.to_string_locale( &GERMAN ), "Astronomische Einheit" );
 	/// ```
-	fn to_latex( &self, _options: &TexOptions ) -> String {
-		self.to_string()
+	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
+		match self {
+			// Base units
+			Self::Ampere =>    LOCALES.lookup( locale, "ampere" ),
+			Self::Candela =>   LOCALES.lookup( locale, "candela" ),
+			Self::Kelvin =>    LOCALES.lookup( locale, "kelvin" ),
+			Self::Kilogram =>  LOCALES.lookup( locale, "kilogram" ),
+			Self::Meter =>     LOCALES.lookup( locale, "meter" ),
+			Self::Mole =>      LOCALES.lookup( locale, "mol" ),
+			Self::Second =>    LOCALES.lookup( locale, "second" ),
+			// Additional mass units
+			Self::Gram =>      LOCALES.lookup( locale, "gram" ),
+			Self::Tonne =>     LOCALES.lookup( locale, "tonne" ),
+			// Additional length units
+			Self::AstronomicalUnit => LOCALES.lookup( locale, "astronomical_unit" ),
+			Self::Lightyear => LOCALES.lookup( locale, "lightyear" ),
+			Self::Parsec =>    LOCALES.lookup( locale, "parsec" ),
+			//
+			Self::Pascal =>    LOCALES.lookup( locale, "pascal" ),
+			Self::Bar =>       LOCALES.lookup( locale, "bar" ),
+			Self::Sievert =>   LOCALES.lookup( locale, "sievert" ),
+			//
+			_ => self.to_string(),
+		}
 	}
 }
+
+#[cfg( feature = "tex" )]
+impl Latex for Unit {}
+
+#[cfg( all( feature = "i18n", feature = "tex" ) )]
+impl LatexLocale for Unit {}
 
 #[cfg( feature = "tex" )]
 impl LatexSym for Unit {
@@ -312,24 +356,24 @@ impl LatexSym for Unit {
 		match self {
 			Self::Custom( x ) => x.clone(),
 			// Base units
-			Self::Ampere =>    format!( r"\ampere" ),
-			Self::Candela =>   format!( r"\candela" ),
-			Self::Kelvin =>    format!( r"\kelvin" ),
-			Self::Kilogram =>  format!( r"\kilogram" ),
-			Self::Meter =>     format!( r"\meter" ),
-			Self::Mole =>      format!( r"\mol" ),
-			Self::Second =>    format!( r"\second" ),
+			Self::Ampere =>    r"\ampere".to_string(),
+			Self::Candela =>   r"\candela".to_string(),
+			Self::Kelvin =>    r"\kelvin".to_string(),
+			Self::Kilogram =>  r"\kilogram".to_string(),
+			Self::Meter =>     r"\meter".to_string(),
+			Self::Mole =>      r"\mol".to_string(),
+			Self::Second =>    r"\second".to_string(),
 			// Additional mass units
-			Self::Gram =>      format!( r"\gram" ),
-			Self::Tonne =>     format!( r"\tonne" ),
+			Self::Gram =>      r"\gram".to_string(),
+			Self::Tonne =>     r"\tonne".to_string(),
 			// Additional length units
-			Self::AstronomicalUnit => format!( r"\astronomicalunit" ),
-			Self::Lightyear => format!( r"\lightyear" ),
-			Self::Parsec =>    format!( r"\parsec" ),
+			Self::AstronomicalUnit => r"\astronomicalunit".to_string(),
+			Self::Lightyear => r"\lightyear".to_string(),
+			Self::Parsec =>    r"\parsec".to_string(),
 			//
-			Self::Pascal =>    format!( r"\pascal" ),
-			Self::Bar =>       format!( r"\bar" ),
-			Self::Sievert =>   format!( r"\sievert" ),
+			Self::Pascal =>    r"\pascal".to_string(),
+			Self::Bar =>       r"\bar".to_string(),
+			Self::Sievert =>   r"\sievert".to_string(),
 		}
 	}
 }
@@ -360,7 +404,7 @@ mod tests {
 	}
 
 	#[test]
-	fn print_prefix() {
+	fn print_unit() {
 		assert_eq!( Unit::Ampere.to_string(), "ampere".to_string() );
 		assert_eq!( Unit::Ampere.to_string_sym(), "A".to_string() );
 		assert_eq!( Unit::Candela.to_string(), "candela".to_string() );
