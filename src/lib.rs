@@ -2,6 +2,7 @@
 //! [`Num`]: crate::Num
 //! [`Prefix`]: crate::Prefix
 //! [`Qty`]: crate::Qty
+//! [`fluent_templates`]: fluent_templates
 //! [`serde`]: serde
 // File links are not supported by rustdoc.
 //! [LICENSE-APACHE]: https://github.com/Kamduis/sinum/blob/master/LICENSE-APACHE
