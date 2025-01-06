@@ -2,6 +2,8 @@
 
 # SI Prefixes
 
+quecto = Quekto
+ronto = Ronto
 yocto = Yokto
 zepto = Zepto
 atto = Atto
@@ -22,6 +24,8 @@ peta = Peta
 exa = Exa
 zetta = Zetta
 yotta = Yotta
+ronna = Ronna
+quetta = Quetta
 
 
 # SI Units

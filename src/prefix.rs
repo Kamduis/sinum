@@ -53,6 +53,8 @@ pub enum PrefixError {
 #[cfg_attr( feature = "serde", derive( Serialize, Deserialize ) )]
 #[derive( Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Debug )]
 pub enum Prefix {
+	Quecto,
+	Ronto,
 	Yocto,
 	Zepto,
 	Atto,
@@ -74,14 +76,16 @@ pub enum Prefix {
 	Exa,
 	Zetta,
 	Yotta,
+	Ronna,
+	Quetta,
 }
 
 impl Prefix {
 	/// Larges exponent representable by `Self`.
-	pub const MAX_EXP: i8 = 15;
+	pub const MAX_EXP: i8 = 30;
 
 	/// Smalles exponent representable by `Self`.
-	pub const MIN_EXP: i8 = -15;
+	pub const MIN_EXP: i8 = -30;
 
 	/// Return the factor represented by this prefix.
 	///
@@ -93,6 +97,8 @@ impl Prefix {
 	/// ```
 	pub fn as_f64( &self ) -> f64 {
 		match self {
+			Self::Quecto => 1e-30,
+			Self::Ronto => 1e-27,
 			Self::Yocto => 1e-24,
 			Self::Zepto => 1e-21,
 			Self::Atto =>  1e-18,
@@ -114,6 +120,8 @@ impl Prefix {
 			Self::Exa =>   1e18,
 			Self::Zetta => 1e21,
 			Self::Yotta => 1e24,
+			Self::Ronna => 1e27,
+			Self::Quetta => 1e30,
 		}
 	}
 
@@ -127,6 +135,8 @@ impl Prefix {
 	/// ```
 	pub fn exp( &self ) -> i8 {
 		match self {
+			Self::Quecto => -30,
+			Self::Ronto =>  -27,
 			Self::Yocto =>  -24,
 			Self::Zepto =>  -21,
 			Self::Atto =>   -18,
@@ -148,12 +158,16 @@ impl Prefix {
 			Self::Exa =>     18,
 			Self::Zetta =>   21,
 			Self::Yotta =>   24,
+			Self::Ronna =>   27,
+			Self::Quetta =>  30,
 		}
 	}
 
 	/// Returns `self` as symbol string. While `to_string()` returns the name of the unit prefix, this returns the prexif letter as it is written in front of the unit symbol.
 	pub fn to_string_sym( &self ) -> String {
 		let res = match self {
+			Self::Quecto =>  "q",
+			Self::Ronto =>   "r",
 			Self::Yocto =>   "y",
 			Self::Zepto =>   "z",
 			Self::Atto =>    "a",
@@ -175,6 +189,8 @@ impl Prefix {
 			Self::Exa =>     "E",
 			Self::Zetta =>   "Z",
 			Self::Yotta =>   "Y",
+			Self::Ronna =>   "R",
+			Self::Quetta =>  "Q",
 		};
 
 		res.to_string()
@@ -199,6 +215,8 @@ impl TryFrom<i8> for Prefix {
 	/// ```
 	fn try_from( item: i8 ) -> Result<Self, Self::Error> {
 		let res = match item {
+			-30 => Self::Quecto,
+			-27 => Self::Ronto,
 			-24 => Self::Yocto,
 			-21 => Self::Zepto,
 			-18 => Self::Atto,
@@ -220,6 +238,8 @@ impl TryFrom<i8> for Prefix {
 			18  => Self::Exa,
 			21  => Self::Zetta,
 			24  => Self::Yotta,
+			27  => Self::Ronna,
+			30  => Self::Quetta,
 			_ => return Err( PrefixError::TryFromExp( item ) ),
 		};
 
@@ -232,6 +252,8 @@ impl FromStr for Prefix {
 
 	fn from_str( s: &str ) -> Result<Self, Self::Err> {
 		let result = match s.to_lowercase().as_str() {
+			"quecto"  => Self::Quecto,
+			"ronto"   => Self::Ronto,
 			"yocto"   => Self::Yocto,
 			"zepto"   => Self::Zepto,
 			"atto"    => Self::Atto,
@@ -253,6 +275,8 @@ impl FromStr for Prefix {
 			"exa"     => Self::Exa,
 			"zetta"   => Self::Zetta,
 			"yotta"   => Self::Yotta,
+			"ronna"   => Self::Ronna,
+			"quetta"  => Self::Quetta,
 			_ => return Err( PrefixError::TryFromStr( s.to_string() ) ),
 		};
 
@@ -263,6 +287,8 @@ impl FromStr for Prefix {
 impl fmt::Display for Prefix {
 	fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
 		let res = match self {
+			Self::Quecto =>  "quecto",
+			Self::Ronto =>   "ronto",
 			Self::Yocto =>   "yocto",
 			Self::Zepto =>   "zepto",
 			Self::Atto =>    "atto",
@@ -284,6 +310,8 @@ impl fmt::Display for Prefix {
 			Self::Exa =>     "exa",
 			Self::Zetta =>   "zetta",
 			Self::Yotta =>   "yotta",
+			Self::Ronna =>   "ronna",
+			Self::Quetta =>  "quetta",
 		};
 
 		write!( f, "{}", res )
@@ -294,6 +322,8 @@ impl fmt::Display for Prefix {
 impl DisplayLocale for Prefix {
 	fn to_string_locale( &self, locale: &LanguageIdentifier ) -> String {
 		match self {
+			Self::Quecto =>  LOCALES.lookup( locale, "quecto" ),
+			Self::Ronto =>   LOCALES.lookup( locale, "ronto" ),
 			Self::Yocto =>   LOCALES.lookup( locale, "yocto" ),
 			Self::Zepto =>   LOCALES.lookup( locale, "zepto" ),
 			Self::Atto =>    LOCALES.lookup( locale, "atto" ),
@@ -315,6 +345,8 @@ impl DisplayLocale for Prefix {
 			Self::Exa =>     LOCALES.lookup( locale, "exa" ),
 			Self::Zetta =>   LOCALES.lookup( locale, "zetta" ),
 			Self::Yotta =>   LOCALES.lookup( locale, "yotta" ),
+			Self::Ronna =>   LOCALES.lookup( locale, "ronna" ),
+			Self::Quetta =>  LOCALES.lookup( locale, "quetta" ),
 		}
 	}
 }
@@ -339,6 +371,8 @@ impl LatexSym for Prefix {
 	/// ```
 	fn to_latex_sym( &self, _options: &TexOptions ) -> String {
 		match self {
+			Self::Quecto =>  r"\quecto".to_string(),
+			Self::Ronto =>   r"\ronto".to_string(),
 			Self::Yocto =>   r"\yocto".to_string(),
 			Self::Zepto =>   r"\zepto".to_string(),
 			Self::Atto =>    r"\atto".to_string(),
@@ -360,6 +394,8 @@ impl LatexSym for Prefix {
 			Self::Exa =>     r"\exa".to_string(),
 			Self::Zetta =>   r"\zetta".to_string(),
 			Self::Yotta =>   r"\yotta".to_string(),
+			Self::Ronna =>   r"\ronna".to_string(),
+			Self::Quetta =>  r"\quetta".to_string(),
 		}
 	}
 }
