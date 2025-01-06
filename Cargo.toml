@@ -1,6 +1,6 @@
 [package]
 name = "sinum"
-version = "0.4.0"
+version = "0.4.2"
 edition = "2021"
 authors = ["Victor von Rhein"]
 description = "Representing numbers and quantities by enabling the use of prefixes and units."
@@ -18,5 +18,5 @@ tex = []
 [dependencies]
 fluent-templates = { version = "0.9.4", optional = true }
 serde = { version = "1.0.195", features = ["derive"], optional = true }
-thiserror = "1.0.56"
+thiserror = "2.0.6"
 unic-langid = { version = "0.9.5", optional = true }

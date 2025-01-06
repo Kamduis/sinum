@@ -571,6 +571,23 @@ impl Neg for Num {
 	}
 }
 
+impl From<f32> for Num {
+	/// Creates a new `Num` from `item`. This is similar to `Num::new()` but expecting `f32`.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::Num;
+	/// assert_eq!( Num::from( 9999.9 ), Num::new( 9999.9 ) );
+	/// assert_eq!( Num::from( 99999.9 ), Num::new( 99999.9 ) );
+	/// ```
+	fn from( item: f32 ) -> Self {
+		Self {
+			mantissa: item as f64,
+			prefix: Prefix::Nothing,
+		}
+	}
+}
+
 impl From<f64> for Num {
 	/// Creates a new `Num` from `item`. This is identical to `Num::new()`.
 	///
