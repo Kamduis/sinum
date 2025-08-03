@@ -621,9 +621,26 @@ impl fmt::Display for Num {
 
 #[cfg( feature = "tex" )]
 impl Latex for Num {
-	/// Return a string that represents this `Qty` as LaTeX string.
-	fn to_latex( &self, options: &TexOptions ) -> String {
-		self.to_latex_sym( options )
+	/// Return a string that represents this `Num` as LaTeX string.
+	///
+	/// # Example
+	/// ```
+	/// # use sinum::LatexSym;
+	/// # use sinum::{Num, Prefix, TexOptions};
+	/// assert_eq!( Num::new( 9.9 ).to_latex( &TexOptions::none() ), r"\num{9.9}".to_string() );
+	/// assert_eq!(
+	///     Num::new( 9.9 ).with_prefix( Prefix::Milli ).to_latex_sym( &TexOptions::none() ),
+	///     r"\num{9.9}\,m".to_string()
+	/// );
+	/// ```
+	fn to_latex( &self, _options: &TexOptions ) -> String {
+		// Avoiding print output like "0.100000000012".
+		let mantissa_rounded = ( self.mantissa * 1e6 ).round() / 1e6;
+
+		match self.prefix {
+			Prefix::Nothing => format!( r"\num{{{mantissa_rounded}}}" ),
+			_ => format!( r"\num{{{}}}\,{}", mantissa_rounded, self.prefix.to_string_sym() )
+		}
 	}
 }
 
@@ -640,6 +657,12 @@ impl LatexSym for Num {
 	///     Num::new( 9.9 ).with_prefix( Prefix::Milli ).to_latex_sym( &TexOptions::none() ),
 	///     r"\qty{9.9}{\milli}".to_string()
 	/// );
+	/// ```
+	///
+	/// Please note that this method of number typesetting is technically wrong. `{siunitx}` will complain if the `prefix` of the `Num` is something other than `Prefix::Nothing`.
+	/// You can make it work by defining `\nothing` as a unit that does not print anything:
+	/// ```LaTeX
+	/// \DeclareSIUnit{\nothing}{\relax}
 	/// ```
 	fn to_latex_sym( &self, options: &TexOptions ) -> String {
 		let mantissa = match options.minimum_decimal_digits {
@@ -699,6 +722,14 @@ mod tests {
 	#[cfg( feature = "tex" )]
 	#[test]
 	fn sinum_latex_prefix() {
+		assert_eq!( Num::new( 99999.0 ).to_latex( &TexOptions::new() ), r"\num{99999}".to_string() );
+		assert_eq!( Num::new( 99999.0 ).shortened().unwrap().to_latex( &TexOptions::new() ), r"\num{99.999}\,k".to_string() );
+		assert_eq!( Num::new( 1e9 ).shortened().unwrap().to_latex( &TexOptions::new() ), r"\num{1}\,G".to_string() );
+	}
+
+	#[cfg( feature = "tex" )]
+	#[test]
+	fn sinum_latex_sym_prefix() {
 		assert_eq!( Num::new( 99999.0 ).to_latex_sym( &TexOptions::new() ), r"\num{99999}".to_string() );
 		assert_eq!( Num::new( 99999.0 ).shortened().unwrap().to_latex_sym( &TexOptions::new() ), r"\qty{99.999}{\kilo\nothing}".to_string() );
 		assert_eq!( Num::new( 1e9 ).shortened().unwrap().to_latex_sym( &TexOptions::new() ), r"\qty{1}{\giga\nothing}".to_string() );
