@@ -1,7 +1,7 @@
 [package]
 name = "sinum"
 version = "0.4.3"
-edition = "2021"
+edition = "2024"
 authors = ["Victor von Rhein"]
 description = "Representing numbers and quantities by enabling the use of prefixes and units."
 readme = "README.md"
