@@ -14,10 +14,8 @@ use std::ops::{Add, Sub, Mul, MulAssign, Div, Neg};
 #[cfg( feature = "serde" )]
 use serde::{Serialize, Deserialize};
 
-#[cfg( feature = "tex" )]
-use crate::{Latex, LatexSym};
-#[cfg( feature = "tex" )]
-use crate::TexOptions;
+#[cfg( feature = "tex" )] use crate::{Latex, LatexSym};
+#[cfg( feature = "tex" )] use crate::TexOptions;
 
 use crate::prefix::PrefixError;
 use crate::unit::UnitError;
